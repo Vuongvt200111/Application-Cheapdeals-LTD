@@ -1,0 +1,168 @@
+<?php
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Order.php';
+require_once __DIR__ . '/../models/Wishlist.php';
+require_once __DIR__ . '/../models/Package.php';
+require_once __DIR__ . '/../models/Product.php';
+
+class AccountController extends BaseController {
+    public function dashboard() {
+        if (!$this->me) {
+            redirect('login.php');
+        }
+        if ($this->me['role'] !== 'user') {
+            redirect($this->me['role'] === 'admin' ? 'admin.php' : 'staff.php');
+        }
+
+        // Handle AJAX action
+        if (isset($_GET['action'])) {
+            header('Content-Type: application/json');
+            if ($_GET['action'] === 'send_security_code') {
+                $code = sprintf('%06d', mt_rand(100000, 999999));
+                $s_save = $this->pdo->prepare('INSERT INTO email_verifications (email, code) VALUES (?, ?) ON DUPLICATE KEY UPDATE code = VALUES(code)');
+                $s_save->execute([$this->me['email'], $code]);
+                
+                $logPath = 'C:/Users/admin/.gemini/antigravity/brain/bdc7f455-ab25-4e53-9789-454d163d6bb2/scratch/email_codes.log';
+                @file_put_contents($logPath, "[" . date('Y-m-d H:i:s') . "] [" . $this->me['email'] . "] Security Code: $code\n", FILE_APPEND);
+                try {
+                    @mail($this->me['email'], "CheapDeals Security Verification Code", "Your verification code is: $code", "From: no-reply@cheapdeals.com");
+                } catch (Throwable $e) {}
+                
+                echo json_encode(['success' => true, 'message' => 'Verification code sent to your email. Check scratch/email_codes.log.']);
+                exit;
+            }
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $act = $_POST['act'] ?? '';
+            
+            if ($act === 'updateProfile') {
+                $avatarPath = $this->me['avatar'];
+                if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                    $tmpName = $_FILES['avatar']['tmp_name'];
+                    $name = basename($_FILES['avatar']['name']);
+                    $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+                    if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif'])) {
+                        $newName = 'avatar_' . $this->me['id'] . '_' . time() . '.' . $ext;
+                        $destDir = __DIR__ . '/../uploads';
+                        if (!is_dir($destDir)) {
+                            mkdir($destDir, 0777, true);
+                        }
+                        if (move_uploaded_file($tmpName, $destDir . '/' . $newName)) {
+                            $avatarPath = 'uploads/' . $newName;
+                        }
+                    }
+                }
+                
+                User::updateProfile(
+                    $this->me['id'],
+                    trim($_POST['name'] ?? ''),
+                    trim($_POST['address'] ?? ''),
+                    trim($_POST['phone'] ?? ''),
+                    trim($_POST['card'] ?? ''),
+                    trim($_POST['payment_pin'] ?? ''),
+                    $avatarPath
+                );
+                
+                // Refresh session ME
+                $this->me = User::getById($this->me['id']);
+                $_SESSION['ME'] = $this->me;
+                $GLOBALS['ME'] = $this->me;
+                
+                redirect('account.php?tab=personal&msg=' . urlencode('Profile details updated.'));
+            }
+            
+            if ($act === 'changePassword') {
+                $new = trim($_POST['new_password'] ?? '');
+                $confirm = trim($_POST['confirm_password'] ?? '');
+                $code = trim($_POST['code'] ?? '');
+                
+                $s_code = $this->pdo->prepare('SELECT code FROM email_verifications WHERE email=?');
+                $s_code->execute([$this->me['email']]);
+                $saved_code = $s_code->fetchColumn();
+                
+                if (!$saved_code || $saved_code !== $code) {
+                    redirect('account.php?tab=security&err=' . urlencode('Invalid verification code.'));
+                }
+                
+                if ($new !== $confirm) {
+                    redirect('account.php?tab=security&err=' . urlencode('Passwords do not match.'));
+                }
+                
+                if (strlen($new) < 6) {
+                    redirect('account.php?tab=security&err=' . urlencode('New password must be at least 6 characters.'));
+                }
+                
+                $hash = password_hash($new, PASSWORD_DEFAULT);
+                $this->pdo->prepare('UPDATE users SET password=? WHERE id=?')->execute([$hash, $this->me['id']]);
+                $this->pdo->prepare('DELETE FROM email_verifications WHERE email=?')->execute([$this->me['email']]);
+                
+                redirect('account.php?tab=security&msg=' . urlencode('Password changed successfully.'));
+            }
+            
+            if ($act === 'submitReview') {
+                $item_code = trim($_POST['item_code'] ?? '');
+                $rating = max(1, min(5, (int)($_POST['rating'] ?? 5)));
+                $comment = trim($_POST['comment'] ?? '');
+                
+                $s_rev = $this->pdo->prepare('SELECT id FROM reviews WHERE user_id=? AND item_code=?');
+                $s_rev->execute([$this->me['id'], $item_code]);
+                $exists = $s_rev->fetch();
+                
+                if ($exists) {
+                    $this->pdo->prepare('UPDATE reviews SET rating=?, comment=? WHERE id=?')
+                             ->execute([$rating, $comment, $exists['id']]);
+                } else {
+                    $this->pdo->prepare('INSERT INTO reviews (user_id, item_code, rating, comment) VALUES (?, ?, ?, ?)')
+                             ->execute([$this->me['id'], $item_code, $rating, $comment]);
+                }
+                
+                $is_pkg = (Package::getByCode($item_code) !== null);
+                $table = $is_pkg ? 'packages' : 'products';
+                
+                $s_avg = $this->pdo->prepare('SELECT AVG(rating), COUNT(*) FROM reviews WHERE item_code=?');
+                $s_avg->execute([$item_code]);
+                $avg = $s_avg->fetch();
+                
+                $avg_score = round((float)$avg[0], 2);
+                $avg_count = (int)$avg[1];
+                
+                $this->pdo->prepare("UPDATE `$table` SET rating_score=?, rating_count=? WHERE code=?")
+                         ->execute([$avg_score, $avg_count, $item_code]);
+                         
+                redirect('account.php?tab=reviews&msg=' . urlencode('Review submitted successfully.'));
+            }
+        }
+
+        $tab = $_GET['tab'] ?? 'overview';
+        $orders = Order::getForUser($this->me['id']);
+        
+        $wishlist_items = [];
+        if ($tab === 'wishlist') {
+            $wish_codes = Wishlist::getForUser($this->me['id']);
+            foreach ($wish_codes as $code) {
+                $p = Package::getByCode($code) ?: Product::getByCode($code);
+                if ($p) {
+                    $wishlist_items[] = $p;
+                }
+            }
+        }
+
+        // Fetch user reviews
+        $reviews = [];
+        if ($tab === 'reviews') {
+            $s_rev = $this->pdo->prepare('SELECT * FROM reviews WHERE user_id=? ORDER BY created_at DESC');
+            $s_rev->execute([$this->me['id']]);
+            $reviews = $s_rev->fetchAll();
+        }
+
+        $this->render('account/dashboard', [
+            'tab' => $tab,
+            'orders' => $orders,
+            'wishlist_items' => $wishlist_items,
+            'reviews' => $reviews,
+            'points' => $this->me['points']
+        ]);
+    }
+}

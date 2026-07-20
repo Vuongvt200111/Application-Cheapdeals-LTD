@@ -1,0 +1,13 @@
+/* ===== DESKTOP layout (loaded when view = desktop) =====
+   Wide page, top navigation bar, multi-column grids, NO phone frame. */
+.bottom-nav{display:none}
+.device,.screen{width:100%;display:block}
+.nav-links{display:flex}                 /* show the text links in the top bar */
+.wrap{max-width:1080px;margin:0 auto;padding:28px 24px 64px}
+.hero{padding:56px 24px}
+header.nav{padding:12px 26px}
+/* roomier grid on big screens */
+@media(min-width:1000px){ .grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))} }
+/* account layout keeps its two columns on desktop (base already handles) */
+.view-toggle{border:1px solid var(--neon);color:var(--neon);border-radius:9px;padding:6px 10px;font-size:13px;font-weight:600;background:transparent;cursor:pointer}
+.view-toggle:hover{background:rgba(0,229,255,.08)}
