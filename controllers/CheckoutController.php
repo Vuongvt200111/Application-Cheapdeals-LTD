@@ -97,10 +97,28 @@ class CheckoutController extends BaseController {
     }
 
     private function processPayment() {
-        // 1. Payment PIN check
+        // 1. Payment PIN check & Dynamic Creation (BUG-PIN/Save)
         $payment_pin = $_POST['payment_pin'] ?? '';
-        if (!paymentPinRecentlyVerified() && !verifyPaymentPin($this->me, $payment_pin)) {
-            redirect('checkout.php?msg=' . urlencode('Payment blocked: invalid 6-digit payment PIN.'));
+        if (empty($this->me['payment_pin_hash'])) {
+            if (!preg_match('/^\d{6}$/', $payment_pin)) {
+                redirect('checkout.php?msg=' . urlencode('Payment blocked: PIN must be exactly 6 digits.'));
+            }
+            $hash = password_hash($payment_pin, PASSWORD_DEFAULT);
+            $this->pdo->prepare('UPDATE users SET payment_pin_hash=? WHERE id=?')->execute([$hash, $this->me['id']]);
+            
+            // Also auto-save credit card to profile
+            $cardNum = preg_replace('/\D/', '', $_POST['co_num'] ?? '');
+            if ($cardNum !== '') {
+                $this->pdo->prepare('UPDATE users SET card=? WHERE id=?')->execute([$cardNum, $this->me['id']]);
+            }
+            
+            $this->me['payment_pin_hash'] = $hash;
+            $this->me['card'] = $cardNum;
+            $_SESSION['ME'] = $this->me;
+        } else {
+            if (!paymentPinRecentlyVerified() && !verifyPaymentPin($this->me, $payment_pin)) {
+                redirect('checkout.php?msg=' . urlencode('Payment blocked: invalid 6-digit payment PIN.'));
+            }
         }
         rememberPaymentPinVerified();
 

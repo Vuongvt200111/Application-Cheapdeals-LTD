@@ -192,14 +192,98 @@
     return status;
   }
   
-  num.addEventListener('input', () => { num.value = fmt(num.value); showNum(); updateCardStatus(); });
-  exp.addEventListener('input', () => { 
-    let v = exp.value.replace(/\D/g, '').slice(0, 4); 
-    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2); 
-    exp.value = v; 
-    ccExp.textContent = v || 'MM/YY'; 
-    updateCardStatus(); 
+  // Caret-preserving Card Number and Expiry formatters (BUG-UX/Inputs)
+  const handleCardInput = (e) => {
+    let el = e.target;
+    let cursor = el.selectionStart;
+    let oldVal = el.value;
+    let digits = oldVal.replace(/\D/g, '').slice(0, 16);
+    
+    let newVal = '';
+    for (let i = 0; i < digits.length; i++) {
+      if (i > 0 && i % 4 === 0) newVal += ' ';
+      newVal += digits[i];
+    }
+    
+    el.value = newVal;
+    
+    // Adjust cursor position
+    let rawDigitsBeforeCursor = oldVal.slice(0, cursor).replace(/\D/g, '').length;
+    let targetCursor = rawDigitsBeforeCursor;
+    if (rawDigitsBeforeCursor > 4) targetCursor += 1;
+    if (rawDigitsBeforeCursor > 8) targetCursor += 1;
+    if (rawDigitsBeforeCursor > 12) targetCursor += 1;
+    
+    targetCursor = Math.min(targetCursor, newVal.length);
+    el.setSelectionRange(targetCursor, targetCursor);
+    
+    showNum();
+    updateCardStatus();
+  };
+  
+  num.addEventListener('input', handleCardInput);
+  
+  num.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace') {
+      let el = e.target;
+      let start = el.selectionStart;
+      let end = el.selectionEnd;
+      if (start === end && start > 0 && el.value[start - 1] === ' ') {
+        e.preventDefault();
+        let val = el.value;
+        el.value = val.slice(0, start - 2) + val.slice(start);
+        el.setSelectionRange(start - 2, start - 2);
+        el.dispatchEvent(new Event('input'));
+      }
+    }
   });
+
+  const handleExpiryInput = (e) => {
+    let el = e.target;
+    let cursor = el.selectionStart;
+    let oldVal = el.value;
+    let digits = oldVal.replace(/\D/g, '').slice(0, 4);
+    
+    let newVal = digits;
+    if (digits.length >= 3) {
+      newVal = digits.slice(0, 2) + '/' + digits.slice(2);
+    }
+    
+    el.value = newVal;
+    
+    // Adjust cursor
+    let targetCursor = cursor;
+    let rawDigitsBeforeCursor = oldVal.slice(0, cursor).replace(/\D/g, '').length;
+    if (rawDigitsBeforeCursor > 2) {
+      targetCursor = rawDigitsBeforeCursor + 1;
+    } else {
+      targetCursor = rawDigitsBeforeCursor;
+    }
+    
+    targetCursor = Math.min(targetCursor, newVal.length);
+    el.setSelectionRange(targetCursor, targetCursor);
+    
+    ccExp.textContent = newVal || 'MM/YY';
+    updateCardStatus();
+  };
+  
+  exp.addEventListener('input', handleExpiryInput);
+  
+  exp.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace') {
+      let el = e.target;
+      let start = el.selectionStart;
+      let end = el.selectionEnd;
+      if (start === end && start > 0 && el.value[start - 1] === '/') {
+        e.preventDefault();
+        let val = el.value;
+        el.value = val.slice(0, start - 2) + val.slice(start);
+        el.setSelectionRange(start - 2, start - 2);
+        el.dispatchEvent(new Event('input'));
+      }
+    }
+  });
+  
   cvv.addEventListener('input', () => { ccCvv.textContent = cvv.value ? cvv.value.replace(/./g, '•') : '•••'; updateCardStatus(); });
   
   updateCardStatus();
@@ -209,21 +293,35 @@
     const existing = document.getElementById('pin-modal');
     if (existing) existing.remove();
 
+    const hasPin = window.HAS_PAYMENT_PIN;
+    const title = hasPin ? 'Enter Payment PIN' : 'Create 6-Digit Payment PIN';
+    const desc = hasPin 
+      ? 'Enter your 6-digit payment PIN to authorise this transaction.' 
+      : 'You have not set a payment PIN yet. Please create a new 6-digit PIN to secure your card for future checkouts.';
+    const confirmText = hasPin ? 'Confirm & Pay' : 'Create & Pay';
+    const label = hasPin ? 'Payment PIN' : 'New Payment PIN';
+
     const modal = document.createElement('div');
     modal.id = 'pin-modal';
     modal.className = 'pin-modal-backdrop';
     modal.innerHTML = `
       <div class="pin-modal" role="dialog" aria-labelledby="pin-modal-title">
-        <h3 id="pin-modal-title">Enter Payment PIN</h3>
-        <p class="pin-modal-desc">Enter your 6-digit payment PIN to authorise this transaction.</p>
+        <h3 id="pin-modal-title">${title}</h3>
+        <p class="pin-modal-desc">${desc}</p>
         <div class="fg">
-          <label for="pin-modal-input">Payment PIN</label>
+          <label for="pin-modal-input">${label}</label>
           <input id="pin-modal-input" type="password" inputmode="numeric" maxlength="6" pattern="\\d{6}" placeholder="••••••" autocomplete="off">
         </div>
+        ${!hasPin ? `
+        <div class="fg" style="margin-top: 12px;">
+          <label for="pin-modal-confirm-input">Confirm New PIN</label>
+          <input id="pin-modal-confirm-input" type="password" inputmode="numeric" maxlength="6" pattern="\\d{6}" placeholder="••••••" autocomplete="off">
+        </div>
+        ` : ''}
         <p id="pin-modal-error" class="pin-modal-error" hidden></p>
         <div class="pin-modal-actions">
           <button type="button" class="btn sec" id="pin-modal-cancel">Cancel</button>
-          <button type="button" class="btn" id="pin-modal-confirm">Confirm &amp; Pay</button>
+          <button type="button" class="btn" id="pin-modal-confirm">${confirmText}</button>
         </div>
       </div>
     `;
@@ -249,6 +347,15 @@
       pinError.hidden = true;
       pinInput.style.borderColor = '';
     });
+    
+    const confirmPinInput = document.getElementById('pin-modal-confirm-input');
+    if (confirmPinInput) {
+      confirmPinInput.addEventListener('input', () => {
+        confirmPinInput.value = confirmPinInput.value.replace(/\D/g, '').slice(0, 6);
+        pinError.hidden = true;
+        confirmPinInput.style.borderColor = '';
+      });
+    }
 
     const submitPin = () => {
       const pin = pinInput.value.trim();
@@ -257,6 +364,17 @@
         pinInput.focus();
         return;
       }
+      
+      if (!hasPin) {
+        const confirmPinInput = document.getElementById('pin-modal-confirm-input');
+        const confirmPin = confirmPinInput ? confirmPinInput.value.trim() : '';
+        if (pin !== confirmPin) {
+          showError('PINs do not match. Please verify.');
+          if (confirmPinInput) confirmPinInput.focus();
+          return;
+        }
+      }
+      
       closeModal();
       onConfirm(pin);
     };

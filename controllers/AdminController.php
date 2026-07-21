@@ -50,6 +50,7 @@ class AdminController extends BaseController {
                 $pct = (float)($_POST['discount_pct'] ?? 0);
                 $abs = (float)($_POST['discount_abs'] ?? 0);
                 $seg = $_POST['target_segment'] ?? 'All';
+                $desc = trim($_POST['description'] ?? '');
 
                 // Check duplicate code
                 $chk = $this->pdo->prepare('SELECT id FROM campaigns WHERE code=?');
@@ -58,8 +59,8 @@ class AdminController extends BaseController {
                     $flash = 'Error: Campaign promo code already exists.';
                     $back_tab = 'campaigns';
                 } else {
-                    $this->pdo->prepare('INSERT INTO campaigns(name, code, discount_pct, discount_abs, target_segment, active) VALUES (?,?,?,?,?,1)')
-                        ->execute([$name, $code, $pct, $abs, $seg]);
+                    $this->pdo->prepare('INSERT INTO campaigns(name, code, discount_pct, discount_abs, target_segment, active, description) VALUES (?,?,?,?,?,1,?)')
+                        ->execute([$name, $code, $pct, $abs, $seg, $desc]);
                     
                     $this->pdo->prepare('INSERT INTO audit_logs (user_id, user_email, action, detail) VALUES (?,?,?,?)')
                         ->execute([$this->me['id'], $this->me['email'], 'Create Promo Campaign', 'Created promotion ' . $code . ' (' . $pct . '% off / £' . $abs . ' off) for segment: ' . $seg]);
@@ -68,11 +69,19 @@ class AdminController extends BaseController {
                     $back_tab = 'campaigns';
                 }
             }
-            elseif ($act === 'toggleCampaign') {
+            elseif ($act === 'deleteCampaign') {
                 $id = (int)$_POST['id'];
-                $active = (int)$_POST['active'];
-                $this->pdo->prepare('UPDATE campaigns SET active=? WHERE id=?')->execute([$active, $id]);
-                $flash = 'Campaign status updated.';
+                $s_code = $this->pdo->prepare('SELECT code FROM campaigns WHERE id=?');
+                $s_code->execute([$id]);
+                $c_row = $s_code->fetch();
+                $code = $c_row ? $c_row['code'] : 'Unknown';
+                
+                $this->pdo->prepare('DELETE FROM campaigns WHERE id=?')->execute([$id]);
+                
+                $this->pdo->prepare('INSERT INTO audit_logs (user_id, user_email, action, detail) VALUES (?,?,?,?)')
+                    ->execute([$this->me['id'], $this->me['email'], 'Delete Promo Campaign', 'Deleted promotion ' . $code]);
+                    
+                $flash = 'Campaign promotion deleted.';
                 $back_tab = 'campaigns';
             }
 
@@ -98,7 +107,7 @@ class AdminController extends BaseController {
                 'orders'   => (int)$this->pdo->query('SELECT COUNT(*) FROM orders')->fetchColumn(),
                 'revenue'  => (float)$this->pdo->query('SELECT COALESCE(SUM(total),0) FROM orders')->fetchColumn(),
                 'feedback' => (int)$this->pdo->query('SELECT COUNT(*) FROM feedback')->fetchColumn(),
-                'packages' => (int)$this->pdo->query('SELECT COUNT(*) FROM packages')->fetchColumn(),
+                'packages' => (int)$this->pdo->query('SELECT (SELECT COUNT(*) FROM packages WHERE active=1) + (SELECT COUNT(*) FROM products WHERE active=1)')->fetchColumn(),
                 'campaigns'=> (int)$this->pdo->query('SELECT COUNT(*) FROM campaigns')->fetchColumn(),
             ];
         }

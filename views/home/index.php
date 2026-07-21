@@ -102,7 +102,13 @@ if (!function_exists('cd_best_spec')) {
     function cd_best_spec($packages, $key){
       $bestText = null; $bestValue = null;
       foreach ($packages as $p) {
-        $specs = cd_pkg_specs(json_decode($p['features'], true) ?: []);
+        $features_arr = [];
+        if (isset($p['features'])) {
+            $features_arr = json_decode($p['features'], true) ?: [];
+        } else if (isset($p['description'])) {
+            $features_arr = [$p['description']];
+        }
+        $specs = cd_pkg_specs($features_arr);
         $text = $specs[$key] ?? null;
         if ($text === null) continue;
         $value = cd_spec_value($text);
@@ -131,9 +137,10 @@ if (!function_exists('cd_category_summary')) {
       ];
     }
 }
-$primaryCats = ['Mobile', 'Broadband', 'Tablet'];
+$primaryCats = ['Mobile', 'Broadband', 'Tablet', 'Bundles', 'Hardware'];
 $byCat = [];
 foreach ($pkgs as $p) { $byCat[$p['category']][] = $p; }
+foreach ($prods as $p) { $byCat['Hardware'][] = $p; }
 $cmpCats = array_values(array_filter($primaryCats, fn($c) => !empty($byCat[$c])));
 $serviceSummaries = [];
 foreach ($cmpCats as $c) $serviceSummaries[$c] = cd_category_summary($byCat[$c]);
@@ -190,7 +197,9 @@ require __DIR__ . '/../layout/header.php';
         
         <div class="card-meta">
           <span class="meta-sales">👤.<?= $p['sales_count'] ?> purchased</span>
-          <span class="meta-rating">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> rated)</span>
+          <?php if ($p['rating_count'] > 0): ?>
+<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($p['code']) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> reviews)</a></span>
+<?php endif; ?>
           <span class="meta-stock">📦 <?= $p['inventory'] ?> left</span>
         </div>
 
@@ -198,8 +207,13 @@ require __DIR__ . '/../layout/header.php';
         <?php if (!$ME || !in_array($ME['role'], ['staff', 'admin'], true)): ?>
       <div class="pkg-actions-row" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <div style="display:flex; gap:8px; width:100%;">
-          <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
-          <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+            <a class="btn" style="flex:2; background:#333 !important; color:#777 !important; border: 1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.7; text-decoration:none; display:flex; align-items:center; justify-content:center; text-transform:uppercase; font-size:12px; font-weight:bold;">Order this</a>
+            <a class="btn sec" style="flex:1; background:#222 !important; color:#555 !important; border: 1px solid #333 !important; cursor:not-allowed; pointer-events:none; opacity:0.5; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php else: ?>
+            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
+            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php endif; ?>
         </div>
         <a class="btn" href="support.php?inquiry_code=<?= urlencode($p['code']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -268,7 +282,9 @@ foreach ($pkgs as $p):
     
     <div class="card-meta">
       <span class="meta-sales">👤.<?= $p['sales_count'] ?> purchased</span>
-      <span class="meta-rating">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> rated)</span>
+      <?php if ($p['rating_count'] > 0): ?>
+<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($p['code']) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> reviews)</a></span>
+<?php endif; ?>
       <span class="meta-stock">📦 <?= $p['inventory'] ?> left</span>
     </div>
 
@@ -276,8 +292,13 @@ foreach ($pkgs as $p):
     <?php if (!$ME || !in_array($ME['role'], ['staff', 'admin'], true)): ?>
       <div class="pkg-actions-row" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <div style="display:flex; gap:8px; width:100%;">
-          <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
-          <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+            <a class="btn" style="flex:2; background:#333 !important; color:#777 !important; border: 1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.7; text-decoration:none; display:flex; align-items:center; justify-content:center; text-transform:uppercase; font-size:12px; font-weight:bold;">Order this</a>
+            <a class="btn sec" style="flex:1; background:#222 !important; color:#555 !important; border: 1px solid #333 !important; cursor:not-allowed; pointer-events:none; opacity:0.5; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php else: ?>
+            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
+            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php endif; ?>
         </div>
         <a class="btn" href="support.php?inquiry_code=<?= urlencode($p['code']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -313,7 +334,9 @@ foreach ($prods as $p):
     
     <div class="card-meta">
       <span class="meta-sales">👤.<?= $p['sales_count'] ?> purchased</span>
-      <span class="meta-rating">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> rated)</span>
+      <?php if ($p['rating_count'] > 0): ?>
+<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($p['code']) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> reviews)</a></span>
+<?php endif; ?>
       <span class="meta-stock">📦 <?= $p['inventory'] ?> left</span>
     </div>
 
@@ -323,8 +346,13 @@ foreach ($prods as $p):
     <?php if (!$ME || !in_array($ME['role'], ['staff', 'admin'], true)): ?>
       <div class="pkg-actions-row" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <div style="display:flex; gap:8px; width:100%;">
-          <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
-          <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+            <a class="btn" style="flex:2; background:#333 !important; color:#777 !important; border: 1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.7; text-decoration:none; display:flex; align-items:center; justify-content:center; text-transform:uppercase; font-size:12px; font-weight:bold;">Order this</a>
+            <a class="btn sec" style="flex:1; background:#222 !important; color:#555 !important; border: 1px solid #333 !important; cursor:not-allowed; pointer-events:none; opacity:0.5; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php else: ?>
+            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
+            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+          <?php endif; ?>
         </div>
         <a class="btn" href="support.php?inquiry_code=<?= urlencode($p['code']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
@@ -340,7 +368,7 @@ foreach ($prods as $p):
 
 <?php if ($cmpCats): ?>
 <div id="compareView" style="display:none">
-  <p class="lead">Side-by-side comparison of allowances and pricing — the best value in each row is highlighted.</p>
+  <p class="lead">Side-by-side comparison of allowances and pricing and the best value in each row is highlighted.</p>
   <div class="table-scroll cmp-table service-matrix">
     <table>
       <thead><tr>
@@ -381,7 +409,15 @@ foreach ($prods as $p):
   <?php foreach ($cmpCats as $i => $c):
     $rowLabels = ['device'=>'Includes','minutes'=>'Calls','data'=>'Data','speed'=>'Speed','sms'=>'Texts'];
     $specsByPkg = [];
-    foreach ($byCat[$c] as $p) $specsByPkg[] = cd_pkg_specs(json_decode($p['features'], true) ?: []);
+    foreach ($byCat[$c] as $p) {
+      $features_arr = [];
+      if (isset($p['features'])) {
+          $features_arr = json_decode($p['features'], true) ?: [];
+      } else if (isset($p['description'])) {
+          $features_arr = [$p['description']];
+      }
+      $specsByPkg[] = cd_pkg_specs($features_arr);
+    }
     $activeRows = [];
     foreach ($rowLabels as $key => $label) {
       foreach ($specsByPkg as $s) { if ($s[$key] !== null) { $activeRows[$key] = $label; break; } }
@@ -413,7 +449,13 @@ foreach ($prods as $p):
               <?php endforeach; ?>
             </tr>
           <?php endforeach; ?>
-          <tr><th>Order now</th><?php foreach ($byCat[$c] as $p): ?><td><a class="btn small" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order</a></td><?php endforeach; ?></tr>
+          <tr><th>Order now</th><?php foreach ($byCat[$c] as $p): ?><td>
+            <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+              <a class="btn small" style="background:#555 !important; color:#aaa !important; border:1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.6; text-decoration:none; display:inline-block; padding:4px 8px; font-size:11px; font-weight:bold;">Out of stock</a>
+            <?php else: ?>
+              <a class="btn small" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order</a>
+            <?php endif; ?>
+          </td><?php endforeach; ?></tr>
         </tbody>
       </table>
     </div>

@@ -23,11 +23,11 @@ if (isset($_GET['add'])) {
     else $_SESSION['cart'][$key] = ['code' => null, 'name' => $name, 'price' => $price, 'type' => 'custom', 'qty' => 1, 'hw' => $hw];
   } else {
     $code = $_GET['add'];
-    $s = $pdo->prepare('SELECT code,name,price FROM packages WHERE code=? AND active=1'); $s->execute([$code]); $p = $s->fetch();
+    $s = $pdo->prepare('SELECT code,name,price,inventory FROM packages WHERE code=? AND active=1'); $s->execute([$code]); $p = $s->fetch();
     if ($p) {
       $p['type'] = 'package';
     } else {
-      $s_prod = $pdo->prepare('SELECT code,name,price FROM products WHERE code=? AND active=1');
+      $s_prod = $pdo->prepare('SELECT code,name,price,inventory FROM products WHERE code=? AND active=1');
       $s_prod->execute([$code]);
       $p = $s_prod->fetch();
       if ($p) {
@@ -37,6 +37,17 @@ if (isset($_GET['add'])) {
     if ($p) {
       $type = $p['type'];
       $is_hw = ($type === 'product');
+      $inventory = (int)$p['inventory'];
+      
+      $new_qty = 1;
+      if (isset($_SESSION['cart'][$p['code']])) {
+        $new_qty = $_SESSION['cart'][$p['code']]['qty'] + 1;
+      }
+      
+      if ($new_qty > $inventory) {
+        redirect('cart.php?msg=' . urlencode('Sorry, "' . $p['name'] . '" only has ' . $inventory . ' left in stock.'));
+      }
+      
       if (isset($_SESSION['cart'][$p['code']])) $_SESSION['cart'][$p['code']]['qty']++;
       else $_SESSION['cart'][$p['code']] = ['code' => $p['code'], 'name' => $p['name'], 'price' => (float)$p['price'], 'type' => $type, 'qty' => 1, 'hw' => $is_hw];
     }
@@ -51,8 +62,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     foreach ((array)($_POST['qty'] ?? []) as $key => $qty) {
       $qty = (int)$qty;
       if (!isset($_SESSION['cart'][$key])) continue;
-      if ($qty <= 0) unset($_SESSION['cart'][$key]);
-      else $_SESSION['cart'][$key]['qty'] = min($qty, 20);
+      if ($qty <= 0) {
+        unset($_SESSION['cart'][$key]);
+        continue;
+      }
+      
+      // Verify stock limits (BUG-Cart/Stock)
+      $it = $_SESSION['cart'][$key];
+      if ($it['type'] !== 'custom') {
+        $s_stock = $pdo->prepare("SELECT name, inventory FROM packages WHERE code=? AND active=1 UNION SELECT name, inventory FROM products WHERE code=? AND active=1");
+        $s_stock->execute([$it['code'], $it['code']]);
+        $item_stock = $s_stock->fetch();
+        if ($item_stock) {
+          $inventory = (int)$item_stock['inventory'];
+          $item_name = $item_stock['name'];
+          if ($qty > $inventory) {
+            redirect('cart.php?msg=' . urlencode('Sorry, "' . $item_name . '" only has ' . $inventory . ' left in stock.'));
+          }
+        }
+      }
+      
+      $_SESSION['cart'][$key]['qty'] = min($qty, 20);
     }
     redirect('cart.php?msg=' . urlencode('Cart updated.'));
   } elseif ($act === 'remove') {

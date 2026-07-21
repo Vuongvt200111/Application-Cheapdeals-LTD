@@ -73,7 +73,23 @@ if (!empty($orders)) {
   
   <?php if ($tab === 'overview'):
     $saved = 0; foreach ($orders as $o) $saved += (float)$o['saved'];
-    $cur_pkg = $orders ? $orders[0]['package_name'] : '—';
+    $cur_pkg = '—';
+    if ($orders) {
+        $first_o = $orders[0];
+        if (strpos($first_o['package_name'], 'Cart (') === 0) {
+            $o_id = (int)$first_o['id'];
+            $stmt_items = $pdo->prepare("SELECT item_name, count(*) as qty FROM order_items WHERE order_id = ? GROUP BY item_name");
+            $stmt_items->execute([$o_id]);
+            $items_list = $stmt_items->fetchAll();
+            $item_names = [];
+            foreach ($items_list as $it) {
+                $item_names[] = $it['item_name'] . ($it['qty'] > 1 ? ' (x' . $it['qty'] . ')' : '');
+            }
+            $cur_pkg = implode(', ', $item_names);
+        } else {
+            $cur_pkg = $first_o['package_name'];
+        }
+    }
   ?>
     <div class="acc-head">📊 Account Overview</div>
     <div class="stats">
@@ -171,11 +187,17 @@ if (!empty($orders)) {
             <div class="price"><?= gbp($p['price']) ?><?php if ($is_pkg): ?> <small>/ month</small><?php endif; ?></div>
             <div class="card-meta">
               <span class="meta-sales">👤.<?= $p['sales_count'] ?> purchased</span>
+              <?php if ($p['rating_count'] > 0): ?>
               <span class="meta-rating">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> rated)</span>
+            <?php endif; ?>
               <span class="meta-stock">📦 <?= $p['inventory'] ?> left</span>
             </div>
             <ul><?php foreach ($feat as $f): ?><li><?= esc($f) ?></li><?php endforeach; ?></ul>
-            <a class="btn" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
+            <?php if (!empty($p['is_custom_req'])): ?>
+              <a class="btn" href="checkout.php?custom=<?= urlencode($p['name']) ?>&cprice=<?= $p['price'] ?>&code=custom">Order this</a>
+            <?php else: ?>
+              <a class="btn" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
+            <?php endif; ?>
           </div>
         <?php endforeach; ?>
       </div>
@@ -195,7 +217,7 @@ if (!empty($orders)) {
           <label>Select Purchased Product/Package</label>
           <select name="item_code" required>
             <?php foreach ($purchasedItems as $cd => $nm): ?>
-              <option value="<?= esc($cd) ?>"><?= esc($nm) ?> (<?= esc($cd) ?>)</option>
+              <option value="<?= esc($cd) ?>" <?= (isset($_GET['prefill_code']) && $_GET['prefill_code'] === $cd) ? 'selected' : '' ?>><?= esc($nm) ?> (<?= esc($cd) ?>)</option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -222,7 +244,7 @@ if (!empty($orders)) {
       <p class="lead">You have not submitted any reviews yet.</p>
     <?php else: ?>
       <div class="table-scroll"><table>
-        <thead><tr><th>Date</th><th>Item Code</th><th>Rating</th><th>Comment</th></tr></thead>
+        <thead><tr><th>Date</th><th>Item Code</th><th>Rating</th><th>Comment</th><th style="text-align:center;">Actions</th></tr></thead>
         <tbody>
           <?php foreach ($reviews as $r): ?>
             <tr>
@@ -230,6 +252,21 @@ if (!empty($orders)) {
               <td><code><?= esc($r['item_code']) ?></code></td>
               <td style="color:var(--brand);"><?= str_repeat('⭐', $r['rating']) ?></td>
               <td><?= esc($r['comment']) ?></td>
+              <td style="text-align:center;">
+                <div style="display:inline-flex; gap:8px;">
+                  <button type="button" class="btn small sec" style="padding:2px 8px; font-size:11px;" 
+                          onclick="prefillReviewEdit('<?= esc($r['item_code']) ?>', <?= $r['rating'] ?>, '<?= esc(rawurlencode($r['comment'])) ?>')">
+                    Edit
+                  </button>
+                  <form method="post" onsubmit="return confirm('Delete this review?');" style="margin:0;">
+                    <input type="hidden" name="act" value="deleteReview">
+                    <input type="hidden" name="id" value="<?= $r['id'] ?>">
+                    <button type="submit" class="btn small danger" style="padding:2px 8px; font-size:11px;">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
             </tr>
           <?php endforeach; ?>
         </tbody>
@@ -249,18 +286,50 @@ if (!empty($orders)) {
         <tbody><?php foreach ($orders as $o): ?>
           <tr>
             <td><?= esc(substr($o['created_at'],0,10)) ?></td>
-            <td><?= esc($o['package_name']) ?></td>
+            <td>
+              <?php if (strpos($o['package_name'], 'Cart (') === 0): ?>
+                <?php
+                  $o_id = (int)$o['id'];
+                  $stmt_items = $pdo->prepare("SELECT item_name, count(*) as qty FROM order_items WHERE order_id = ? GROUP BY item_name");
+                  $stmt_items->execute([$o_id]);
+                  $items_list = $stmt_items->fetchAll();
+                  $item_names = [];
+                  foreach ($items_list as $it) {
+                      $item_names[] = esc($it['item_name']) . ($it['qty'] > 1 ? ' (x' . $it['qty'] . ')' : '');
+                  }
+                  echo implode(', ', $item_names);
+                ?>
+              <?php else: ?>
+                <?= esc($o['package_name']) ?>
+              <?php endif; ?>
+            </td>
             <td class="discount"><?= gbp($o['saved']) ?></td>
             <td><?= gbp($o['total']) ?></td>
             <td><?= esc($o['status']) ?></td>
             <td>
-              <?php if (strtolower($o['status']) === 'paid' && !empty($o['cancel_deadline']) && strtotime($o['cancel_deadline']) > time()): ?>
-                <a class="btn small danger" href="cancel.php?id=<?= $o['id'] ?>" style="padding:4px 8px; font-size:11px;">Cancel Order</a>
-              <?php elseif ($o['has_hardware']): ?>
-                <a class="btn small sec" href="track.php?id=<?= $o['id'] ?>" style="padding:4px 8px; font-size:11px;">Track Shipment</a>
-              <?php else: ?>
-                —
-              <?php endif; ?>
+              <?php
+                // Find matching item code for this order to prefill (BUG-Billing/Evaluate)
+                $o_id = (int)$o['id'];
+                $stmt_items = $pdo->prepare("SELECT item_name FROM order_items WHERE order_id = ?");
+                $stmt_items->execute([$o_id]);
+                $name_check = $stmt_items->fetchColumn();
+                if (!$name_check) {
+                    $name_check = $o['package_name'];
+                }
+                
+                $s_pkg = $pdo->prepare("SELECT code FROM packages WHERE name = ?");
+                $s_pkg->execute([$name_check]);
+                $code_val = $s_pkg->fetchColumn();
+                if (!$code_val) {
+                    $s_prd = $pdo->prepare("SELECT code FROM products WHERE name = ?");
+                    $s_prd->execute([$name_check]);
+                    $code_val = $s_prd->fetchColumn();
+                }
+                if (!$code_val) {
+                    $code_val = '';
+                }
+              ?>
+              <a class="btn small" href="account.php?tab=reviews&prefill_code=<?= urlencode($code_val) ?>" style="padding:4px 10px; font-size:11px;">Evaluate</a>
             </td>
           </tr>
         <?php endforeach; ?></tbody>
@@ -271,6 +340,23 @@ if (!empty($orders)) {
 </div>
 
 <script>
+function prefillReviewEdit(itemCode, rating, rawComment) {
+    const itemSelect = document.querySelector('select[name="item_code"]');
+    const ratingSelect = document.querySelector('select[name="rating"]');
+    const commentTextarea = document.querySelector('textarea[name="comment"]');
+    const submitBtn = document.querySelector('form[method="post"] button[type="submit"]');
+    
+    if (itemSelect) itemSelect.value = itemCode;
+    if (ratingSelect) ratingSelect.value = rating;
+    if (commentTextarea) commentTextarea.value = decodeURIComponent(rawComment.replace(/\+/g, ' '));
+    if (submitBtn) submitBtn.textContent = 'Update Review';
+    
+    const formEl = document.querySelector('form[method="post"] select[name="item_code"]').closest('form');
+    if (formEl) {
+        formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const sendSecBtn = document.getElementById('sendSecCodeBtn');
   if (sendSecBtn) {

@@ -9,6 +9,13 @@ if ($code !== '') {
   $s = $pdo->prepare('SELECT discount, expires_at, created_by FROM vouchers WHERE code=?');
   $s->execute([$code]);
   $v = $s->fetch();
+  
+  if (!$v) {
+    // Check campaigns table if not found in vouchers (BUG-Campaign/Apply)
+    $s_camp = $pdo->prepare('SELECT discount_pct as discount, NULL as expires_at, "Campaign" as created_by FROM campaigns WHERE code=? AND active=1');
+    $s_camp->execute([$code]);
+    $v = $s_camp->fetch();
+  }
 }
 
 if (!$v) {

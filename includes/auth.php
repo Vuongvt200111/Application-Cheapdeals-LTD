@@ -75,12 +75,12 @@ try { $pdo->exec("ALTER TABLE packages ADD COLUMN rating_count INT NOT NULL DEFA
 try { $pdo->exec("ALTER TABLE packages ADD COLUMN inventory INT NOT NULL DEFAULT 10"); } catch(Throwable $t){}
 
 // Seed initial values for packages if they are 0
-$pdo->exec("UPDATE packages SET sales_count=1243, rating_score=4.8, rating_count=369, inventory=15 WHERE code='mob-pro' AND sales_count=0");
-$pdo->exec("UPDATE packages SET sales_count=850, rating_score=4.5, rating_count=210, inventory=10 WHERE code='mobile' AND sales_count=0");
-$pdo->exec("UPDATE packages SET sales_count=420, rating_score=4.2, rating_count=85, inventory=8 WHERE code='mob-lite' AND sales_count=0");
-$pdo->exec("UPDATE packages SET sales_count=920, rating_score=4.6, rating_count=150, inventory=12 WHERE code='broadband' AND sales_count=0");
-$pdo->exec("UPDATE packages SET sales_count=1100, rating_score=4.7, rating_count=230, inventory=14 WHERE code='double' AND sales_count=0");
-$pdo->exec("UPDATE packages SET sales_count=1500, rating_score=4.9, rating_count=500, inventory=15 WHERE code='triple' AND sales_count=0");
+$pdo->exec("UPDATE packages SET sales_count=1243, rating_score=0.00, rating_count=0, inventory=15 WHERE code='mob-pro' AND sales_count=0");
+$pdo->exec("UPDATE packages SET sales_count=850, rating_score=0.00, rating_count=0, inventory=10 WHERE code='mobile' AND sales_count=0");
+$pdo->exec("UPDATE packages SET sales_count=420, rating_score=0.00, rating_count=0, inventory=8 WHERE code='mob-lite' AND sales_count=0");
+$pdo->exec("UPDATE packages SET sales_count=920, rating_score=0.00, rating_count=0, inventory=12 WHERE code='broadband' AND sales_count=0");
+$pdo->exec("UPDATE packages SET sales_count=1100, rating_score=0.00, rating_count=0, inventory=14 WHERE code='double' AND sales_count=0");
+$pdo->exec("UPDATE packages SET sales_count=1500, rating_score=0.00, rating_count=0, inventory=15 WHERE code='triple' AND sales_count=0");
 
 // Create products table (Hardware devices)
 $pdo->exec("CREATE TABLE IF NOT EXISTS products (
@@ -137,6 +137,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS campaigns (
   target_segment VARCHAR(100) NOT NULL DEFAULT 'All',
   active TINYINT(1) NOT NULL DEFAULT 1
 )");
+try { $pdo->exec("ALTER TABLE campaigns ADD COLUMN description TEXT NULL"); } catch(Throwable $t){}
 
 $pdo->exec("CREATE TABLE IF NOT EXISTS audit_logs (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -157,6 +158,29 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS reviews (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_item (item_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+// Auto-sync packages and products ratings from reviews table on startup (BUG-Rating/Sync)
+try {
+    $s_pkg_revs = $pdo->query("SELECT item_code, AVG(rating) as avg_score, COUNT(*) as cnt FROM reviews GROUP BY item_code");
+    $all_revs = $s_pkg_revs->fetchAll();
+    
+    // First reset all to 0
+    $pdo->exec("UPDATE packages SET rating_score = 0.00, rating_count = 0");
+    $pdo->exec("UPDATE products SET rating_score = 0.00, rating_count = 0");
+    
+    // Then apply calculated scores
+    foreach ($all_revs as $r) {
+        $item_code = $r['item_code'];
+        $avg_score = round((float)$r['avg_score'], 2);
+        $avg_count = (int)$r['cnt'];
+        
+        $s_up_pkg = $pdo->prepare("UPDATE packages SET rating_score = ?, rating_count = ? WHERE code = ?");
+        $s_up_pkg->execute([$avg_score, $avg_count, $item_code]);
+        
+        $s_up_prd = $pdo->prepare("UPDATE products SET rating_score = ?, rating_count = ? WHERE code = ?");
+        $s_up_prd->execute([$avg_score, $avg_count, $item_code]);
+    }
+} catch (Throwable $t) {}
 
 // Create user_vouchers table for BUG-027
 $pdo->exec("CREATE TABLE IF NOT EXISTS user_vouchers (
@@ -257,12 +281,16 @@ if (!tableColumnExists($pdo, 'users', 'payment_pin_hash')) {
 
 // Seed the payment pin for Nhựt Trần Minh (123456)
 $demoPinHash = password_hash('123456', PASSWORD_DEFAULT);
-$pdo->prepare("UPDATE users SET payment_pin_hash=? WHERE role='user' AND (payment_pin_hash IS NULL OR payment_pin_hash='')")
+$pdo->prepare("UPDATE users SET payment_pin_hash=? WHERE role='user' AND name='Nhựt Trần Minh' AND (payment_pin_hash IS NULL OR payment_pin_hash='')")
     ->execute([$demoPinHash]);
 
 if (!function_exists('verifyPaymentPin')) {
     function verifyPaymentPin($me, $pin){
-      if (!$me || empty($me['payment_pin_hash'])) return false;
+      if (!$me) return false;
+      // If PIN is not set yet, any 6-digit PIN is accepted (will be saved upon form submit) (BUG-PIN/Verify)
+      if (empty($me['payment_pin_hash'])) {
+          return preg_match('/^\d{6}$/', trim((string)$pin));
+      }
       $pin = trim((string)$pin);
       return preg_match('/^\d{6}$/', $pin) && password_verify($pin, $me['payment_pin_hash']);
     }

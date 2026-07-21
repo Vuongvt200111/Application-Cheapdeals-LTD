@@ -92,12 +92,24 @@ if (!function_exists('resolveOfferDiscountPct')) {
   function resolveOfferDiscountPct(PDO $pdo, string $rawCode): float {
     $code = strtoupper(trim($rawCode));
     if ($code === '') return 0.0;
-    if ($code === 'SAVE10') return 0.10;
-    if ($code === 'WELCOME5') return 0.05;
+    
+    // 1. Check vouchers table
     $s = $pdo->prepare('SELECT discount FROM vouchers WHERE code=?');
     $s->execute([$code]);
     $row = $s->fetch();
-    return $row ? max(0, min(50, (int)$row['discount'])) / 100 : 0.0;
+    if ($row) {
+        return max(0, min(50, (int)$row['discount'])) / 100;
+    }
+    
+    // 2. Check campaigns table (BUG-Campaign/Apply)
+    $s2 = $pdo->prepare('SELECT discount_pct FROM campaigns WHERE code=? AND active=1');
+    $s2->execute([$code]);
+    $row2 = $s2->fetch();
+    if ($row2) {
+        return max(0, min(100, (float)$row2['discount_pct'])) / 100;
+    }
+    
+    return 0.0;
   }
 }
 

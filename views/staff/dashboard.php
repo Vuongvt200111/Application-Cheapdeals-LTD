@@ -220,10 +220,28 @@ require __DIR__ . '/../layout/header.php';
               </div>
             <?php endif; ?>
         </div>
-        <div class="chat">
+        <div class="chat" style="height:350px; overflow-y:auto; padding:10px; border:1px solid var(--line); border-radius:8px; background:transparent; display:flex; flex-direction:column;">
           <?php if (!$chat_msgs): ?><p class="lead" style="margin:10px">No messages.</p><?php endif; ?>
           <?php foreach ($chat_msgs as $m): ?>
-            <div class="bubble <?= $m['sender'] ?>"><div class="who"><?= $m['sender']==='user'?'Customer':'You (staff)' ?></div><?= esc($m['message']) ?></div>
+            <?php
+            $isUser = ($m['sender'] === 'user');
+            $isProductLink = (strpos($m['message'], '[Liên kết sản phẩm]:') !== false);
+            $displayMsg = $m['message'];
+            if ($isProductLink) {
+                $displayMsg = str_replace('[Liên kết sản phẩm]:', '📦 *Product Inquiry:* ', $m['message']);
+            }
+            ?>
+            <div class="bubble <?= $m['sender'] ?>" 
+                 style="margin-bottom:12px; padding:10px; border-radius:12px; max-width:75%; <?= $isUser ? 'align-self:flex-start; background:#e9ecef; color:#000;' : 'align-self:flex-end; margin-left:auto; background:#007bff; color:#fff;' ?>; <?= $isProductLink ? 'border: 1px dashed rgba(0,0,0,0.2); background:#d4edda; color:#155724;' : '' ?>">
+              
+              <div class="who" style="font-size:11px; font-weight:bold; opacity:0.8;">
+                <?= $isUser ? 'Customer' : 'You (staff)' ?>
+              </div>
+              <div class="msg-text" style="margin-top:4px; white-space: pre-wrap;"><?= esc($displayMsg) ?></div>
+              <div class="time" style="font-size:9px; text-align:right; opacity:0.6; margin-top:4px;">
+                <?= esc(substr($m['created_at'], 11, 5)) ?>
+              </div>
+            </div>
           <?php endforeach; ?>
         </div>
         <form method="post" class="chat-input">
@@ -235,18 +253,8 @@ require __DIR__ . '/../layout/header.php';
   </div>
 
 <?php elseif ($tab === 'vouchers'): ?>
-  <div class="panel" style="max-width:560px">
-    <h3 class="sec-h" style="margin-top:0">Generate a voucher</h3>
-    <p class="lead" style="margin-top:0">The unique code is saved to the database; a customer can enter it at checkout (FR30).</p>
-    <form method="post" style="display:flex;gap:8px;align-items:flex-end">
-      <input type="hidden" name="act" value="issueVoucher"><input type="hidden" name="back" value="vouchers">
-      <div class="fg" style="margin:0"><label>Discount %</label><input name="discount" type="number" min="1" max="50" value="10" style="width:120px"></div>
-      <button class="btn" type="submit">Generate</button>
-    </form>
-  </div>
-
-  <!-- BỔ SUNG CHO FR30: Cải tiến giao diện chọn tệp phân khúc khách hàng mục tiêu -->
-  <div class="panel" style="max-width:560px; margin-top: 15px;">
+  <!-- BỔ SUNG CHO FR30: Cải tiến giao diện chọn tệp phân khúc khách hàng mục tiêu (Generate a voucher removed per user request) -->
+  <div class="panel" style="max-width:560px; margin-top: 0;">
     <h3 class="sec-h" style="margin-top:0">🎟️ Demographic Cohort Campaign Panel (FR30)</h3>
     <p class="lead" style="margin-top:0">Filter users by consumption logs and dispatch a targeted voucher campaign code instantly.</p>
     <form method="post" style="display:flex; flex-direction:column; gap:12px;">
@@ -339,74 +347,69 @@ require __DIR__ . '/../layout/header.php';
     </tbody>
   </table></div>
 
-<?php else: ?>
-  <?php if (!$orders): ?><p class="lead">No orders yet.</p>
-  <?php elseif ($tab === 'requirements'): ?>
-  <?php if (!empty($_GET['msg'])): ?><div class="msg ok"><?= esc($_GET['msg']) ?></div><?php endif; ?>
-  <h3 class="sec-h" style="margin-top:0">📋 Custom Build Requirements</h3>
-  <p class="lead" style="margin-top:0">Review custom packages built and requested by users. Approve or decline them below.</p>
-  
-  <div class="table-scroll"><table style="width:100%; border-collapse:collapse;">
-    <thead>
-      <tr>
-        <th style="padding:10px; width:6%;">ID</th>
-        <th style="padding:10px; width:15%;">Customer</th>
-        <th style="padding:10px; width:20%;">Email</th>
-        <th style="padding:10px; width:30%;">Details</th>
-        <th style="padding:10px; width:10%;">Price</th>
-        <th style="padding:10px; width:10%;">Status</th>
-        <th style="padding:10px; width:9%;">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-    <?php if (!$requirements): ?><tr><td colspan="7" style="text-align:center;color:var(--muted); padding:20px;">No custom requirements submitted yet.</td></tr><?php endif; ?>
-    <?php foreach ($requirements as $r): ?>
-      <tr style="border-bottom: 1px solid var(--line);">
-        <td style="padding:10px;">#<?= $r['id'] ?></td>
-        <td style="padding:10px; font-weight:600;"><?= esc($r['user_name']) ?></td>
-        <td style="padding:10px;"><?= esc($r['user_email']) ?></td>
-        <td style="padding:10px;">
-          <div style="font-size:12px; text-align:left; line-height:1.4; background:rgba(255,255,255,0.02); padding:8px; border-radius:6px; border:1px solid var(--line);">
-            <strong>Device:</strong> <?= esc($r['device']) ?><br>
-            <strong>Minutes:</strong> <?= esc($r['minutes']) ?><br>
-            <strong>Data:</strong> <?= esc($r['data']) ?><br>
-            <strong>SMS:</strong> <?= esc($r['sms']) ?><br>
-            <strong>Add-ons:</strong> <?= esc($r['addons'] ?: 'None') ?>
-          </div>
-        </td>
-        <td style="padding:10px; font-weight:700; color:var(--heading);"><?= gbp($r['price']) ?></td>
-        <td style="padding:10px;">
-          <span class="tag" style="background: <?= $r['status'] === 'Confirmed' ? 'var(--brand)' : 'var(--muted)' ?>; color:#fff; padding: 3px 8px; border-radius: 4px; font-size:11px; font-weight:bold;">
-            <?= esc($r['status']) ?>
-          </span>
-        </td>
-        <td style="padding:10px;">
-          <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
-            <?php if ($r['status'] === 'Pending'): ?>
-              <form method="post" style="margin:0">
-                <input type="hidden" name="act" value="confirmRequirement">
-                <input type="hidden" name="req_id" value="<?= $r['id'] ?>">
-                <button class="btn small block" type="submit" style="padding:6px 10px;">Confirm</button>
-              </form>
-            <?php endif; ?>
-            <form method="post" onsubmit="return confirm('Delete this requirement?')" style="margin:0">
-              <input type="hidden" name="act" value="deleteRequirement">
-              <input type="hidden" name="req_id" value="<?= $r['id'] ?>">
-              <button class="btn small danger block" type="submit" style="padding:6px 10px;">Delete</button>
-            </form>
-          </div>
-        </td>
-      </tr>
-    <?php endforeach; ?>
-    </tbody>
-  </table></div>
+<?php elseif ($tab === 'orders'): ?>
+  <!-- GIAO DIỆN THANH CÔNG CỤ BỘ LỌC TÌM KIẾM CHO ORDERS (BUG-Nam/Orders) -->
+  <div class="panel" style="margin-bottom: 18px; padding: 14px;">
+    <form method="get" action="staff.php" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin: 0;">
+      <input type="hidden" name="tab" value="orders">
 
-<?php else: ?>
+      <!-- Bộ lọc Tìm kiếm Tên Khách Hàng -->
+      <div class="fg" style="margin: 0; flex: 1; min-width: 200px;">
+        <label style="font-weight: bold; font-size: 13px; color: var(--ink);">🔍 Filter Customer Name:</label>
+        <input name="f_customer" value="<?= esc($filterCustomer) ?>" placeholder="e.g. N,Nam..." style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--card); color: var(--ink);">
+      </div>
+
+      <!-- Bộ lọc Sắp xếp Tổng tiền Total -->
+      <div class="fg" style="margin: 0; min-width: 200px;">
+        <label style="font-weight: bold; font-size: 13px; color: var(--ink);">💰 Sort by Total Price:</label>
+        <select name="s_total" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--card); color: var(--ink);">
+          <option value="">-- Default (Newest) --</option>
+          <option value="desc" <?= $sortTotal === 'desc' ? 'selected' : '' ?>>Highest to Lowest (High → Low)</option>
+          <option value="asc" <?= $sortTotal === 'asc' ? 'selected' : '' ?>>Lowest to Highest (Low → High)</option>
+        </select>
+      </div>
+
+      <!-- Các nút bấm điều khiển hành động form -->
+      <div style="display: flex; gap: 8px;">
+        <button class="btn" type="submit" style="padding: 8px 16px; height: 38px;">Apply Filters</button>
+        <?php if ($filterCustomer !== '' || $sortTotal !== ''): ?>
+          <a class="btn sec" href="staff.php?tab=orders" style="display: inline-flex; align-items: center; justify-content: center; padding: 8px 16px; height: 38px; text-decoration: none; font-size: 13px;">Clear</a>
+        <?php endif; ?>
+      </div>
+    </form>
+  </div>
+
+  <?php if (!$orders): ?>
+    <p class="lead">No orders match your filters. <a href="staff.php?tab=orders">Reset layout</a>.</p>
+  <?php else: ?>
     <div class="table-scroll"><table>
       <thead><tr><th>Date</th><th>Customer</th><th>Email</th><th>Package / Product</th><th>Total</th><th>Status</th></tr></thead>
       <tbody>
       <?php foreach ($orders as $o): ?>
-        <tr><td><?= esc(substr($o['created_at'],0,10)) ?></td><td><?= esc($o['customer']) ?></td><td><?= esc($o['email']) ?></td><td><?= esc($o['package_name']) ?></td><td><?= gbp($o['total']) ?></td><td><?= esc($o['status']) ?></td></tr>
+        <tr>
+          <td><?= esc(substr($o['created_at'],0,10)) ?></td>
+          <td style="font-weight: bold; color: #00f2fe;"><?= esc($o['customer']) ?></td>
+          <td><?= esc($o['email']) ?></td>
+          <td>
+            <?php if (strpos($o['package_name'], 'Cart (') === 0): ?>
+              <?php
+                $o_id = (int)$o['id'];
+                $stmt_items = $pdo->prepare("SELECT item_name, count(*) as qty FROM order_items WHERE order_id = ? GROUP BY item_name");
+                $stmt_items->execute([$o_id]);
+                $items_list = $stmt_items->fetchAll();
+                $item_names = [];
+                foreach ($items_list as $it) {
+                    $item_names[] = esc($it['item_name']) . ($it['qty'] > 1 ? ' (x' . $it['qty'] . ')' : '');
+                }
+                echo implode(', ', $item_names);
+              ?>
+            <?php else: ?>
+              <?= esc($o['package_name']) ?>
+            <?php endif; ?>
+          </td>
+          <td style="font-weight: bold;"><?= gbp($o['total']) ?></td>
+          <td><span class="badge" style="background: #2b8a3e; color: #fff; border:none;"><?= esc($o['status']) ?></span></td>
+        </tr>
       <?php endforeach; ?>
       </tbody>
     </table></div>

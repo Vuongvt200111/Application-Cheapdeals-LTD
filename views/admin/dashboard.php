@@ -25,7 +25,7 @@ require __DIR__ . '/../layout/header.php';
   </div>
   <div class="stats">
     <div class="stat"><div class="num green"><?= gbp($s['revenue']) ?></div><div class="lab">Total revenue</div></div>
-    <div class="stat"><div class="num"><?= $s['packages'] ?></div><div class="lab">Active packages</div></div>
+    <div class="stat"><div class="num"><?= $s['packages'] ?></div><div class="lab">Active packages &amp; products</div></div>
     <div class="stat"><div class="num"><?= $s['campaigns'] ?></div><div class="lab">Promo campaigns</div></div>
   </div>
   <div class="hint">The platform database contains <?= $s['staff'] ?> staff members and <?= $s['feedback'] ?> total ticket log threads.</div>
@@ -77,95 +77,98 @@ require __DIR__ . '/../layout/header.php';
 
 <!-- TAB SECTION 3: CAMPAIGN COMPOSER -->
 <?php elseif ($tab === 'campaigns'): ?>
-  <div class="acc-layout">
-    <section class="acc-main" style="flex:2.2;">
-      <div class="panel">
-        <h3 class="sec-h" style="margin-top:0;">Active Campaigns</h3>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Campaign Name</th>
-                <th>Discount</th>
-                <th>Target Segment</th>
-                <th>Status</th>
+  <div style="display:flex; flex-direction:column; gap:25px; align-items:stretch;">
+    <!-- Active campaigns panel -->
+    <div class="panel">
+      <h3 class="sec-h" style="margin-top:0;">Active Campaigns</h3>
+      <div class="table-scroll">
+        <table style="width:100%;">
+          <thead>
+            <tr>
+              <th style="padding:10px; width:15%;">Code</th>
+              <th style="padding:10px; width:20%;">Campaign Name</th>
+              <th style="padding:10px; width:35%;">Description / Features</th>
+              <th style="padding:10px; width:10%;">Discount</th>
+              <th style="padding:10px; width:10%;">Target Segment</th>
+              <th style="padding:10px; width:10%; text-align:center;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (empty($campaigns)): ?>
+              <tr><td colspan="6" style="text-align:center; color:var(--muted); padding:15px;">No campaigns composed yet.</td></tr>
+            <?php endif; ?>
+            <?php foreach ($campaigns as $c): ?>
+              <tr style="border-bottom:1px solid var(--line);">
+                <td style="padding:10px;"><code><?= esc($c['code']) ?></code></td>
+                <td style="padding:10px;"><strong><?= esc($c['name']) ?></strong></td>
+                <td style="padding:10px; font-size:12px; color:var(--muted); white-space:pre-wrap;"><?= esc($c['description'] ?: 'None') ?></td>
+                <td style="padding:10px;">
+                  <?= $c['discount_pct'] > 0 ? (float)$c['discount_pct'] . '%' : gbp($c['discount_abs']) ?>
+                </td>
+                <td style="padding:10px;"><span class="badge" style="font-size:9px;"><?= esc($c['target_segment']) ?></span></td>
+                <td style="padding:10px; text-align:center;">
+                  <form method="post" onsubmit="return confirm('Delete this campaign?');" style="margin:0;">
+                    <input type="hidden" name="act" value="deleteCampaign">
+                    <input type="hidden" name="back" value="campaigns">
+                    <input type="hidden" name="id" value="<?= $c['id'] ?>">
+                    <button type="submit" class="btn small danger" style="padding:2px 8px;">
+                      Delete
+                    </button>
+                  </form>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              <?php if (empty($campaigns)): ?>
-                <tr><td colspan="5" style="text-align:center; color:var(--muted)">No campaigns composed yet.</td></tr>
-              <?php endif; ?>
-              <?php foreach ($campaigns as $c): 
-                $status_color = $c['active'] ? 'var(--green)' : 'var(--muted)';
-              ?>
-                <tr>
-                  <td><code><?= esc($c['code']) ?></code></td>
-                  <td><strong><?= esc($c['name']) ?></strong></td>
-                  <td>
-                    <?= $c['discount_pct'] > 0 ? (float)$c['discount_pct'] . '%' : gbp($c['discount_abs']) ?>
-                  </td>
-                  <td><span class="badge" style="font-size:9px;"><?= esc($c['target_segment']) ?></span></td>
-                  <td>
-                    <form method="post" style="margin:0;">
-                      <input type="hidden" name="act" value="toggleCampaign">
-                      <input type="hidden" name="back" value="campaigns">
-                      <input type="hidden" name="id" value="<?= $c['id'] ?>">
-                      <input type="hidden" name="active" value="<?= $c['active'] ? 0 : 1 ?>">
-                      <button type="submit" class="btn small" style="background:none; border:1px solid <?= $status_color ?>; color:<?= $status_color ?>; padding:2px 6px;">
-                        <?= $c['active'] ? 'Active' : 'Disabled' ?>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Compose Campaign Form panel -->
+    <div class="panel" style="max-width:600px; padding:20px;">
+      <h3 class="sec-h" style="margin-top:0;">Compose Campaign</h3>
+      <form method="post">
+        <input type="hidden" name="act" value="addCampaign">
+        <input type="hidden" name="back" value="campaigns">
+        
+        <div class="fg">
+          <label>Campaign Name</label>
+          <input name="name" required placeholder="e.g. Autumn Offer">
         </div>
-      </div>
-    </section>
+        
+        <div class="fg" style="margin-top:10px;">
+          <label>Promo Code (Unique)</label>
+          <input name="code" required placeholder="e.g. AUTUMN10">
+        </div>
 
-    <aside class="acc-side" style="flex:1; min-width:240px;">
-      <div class="panel" style="padding:15px;">
-        <h3 class="sec-h" style="margin-top:0;">Compose Campaign</h3>
-        <form method="post">
-          <input type="hidden" name="act" value="addCampaign">
-          <input type="hidden" name="back" value="campaigns">
-          
-          <div class="fg">
-            <label>Campaign Name</label>
-            <input name="name" required placeholder="e.g. Autumn Offer">
-          </div>
-          
-          <div class="fg" style="margin-top:10px;">
-            <label>Promo Code (Unique)</label>
-            <input name="code" required placeholder="e.g. AUTUMN10">
-          </div>
+        <div class="fg" style="margin-top:10px;">
+          <label>Discount Percentage (%)</label>
+          <input name="discount_pct" type="number" step="0.01" value="0.00">
+        </div>
 
-          <div class="fg" style="margin-top:10px;">
-            <label>Discount Percentage (%)</label>
-            <input name="discount_pct" type="number" step="0.01" value="0.00">
-          </div>
+        <div class="fg" style="margin-top:10px;">
+          <label>Discount Value (£ Absolute)</label>
+          <input name="discount_abs" type="number" step="0.01" value="0.00">
+        </div>
 
-          <div class="fg" style="margin-top:10px;">
-            <label>Discount Value (£ Absolute)</label>
-            <input name="discount_abs" type="number" step="0.01" value="0.00">
-          </div>
+        <div class="fg" style="margin-top:10px;">
+          <label>Target Segment</label>
+          <select name="target_segment" style="width:100%; padding:10px; border-radius:8px; background:var(--card); color:var(--ink); border:1px solid var(--line);">
+            <option value="All">All Registered Customers</option>
+            <option value="HeavyData">Heavy Data Users (Data > 20GB)</option>
+            <option value="YoungUsers">Young Audience (Age 16-25)</option>
+          </select>
+        </div>
 
-          <div class="fg" style="margin-top:10px;">
-            <label>Target Segment</label>
-            <select name="target_segment" style="width:100%; padding:10px; border-radius:8px; background:var(--card); color:var(--ink); border:1px solid var(--line);">
-              <option value="All">All Registered Customers</option>
-              <option value="HeavyData">Heavy Data Users (Data > 20GB)</option>
-              <option value="YoungUsers">Young Audience (Age 16-25)</option>
-            </select>
-          </div>
+        <div class="fg" style="margin-top:10px;">
+          <label>Campaign Description / Features (one per line, shown as checkmarks on Offers page)</label>
+          <textarea name="description" rows="3" placeholder="e.g. Extra 50% off any hardware&#10;Stacks with app 15%&#10;Enter at checkout" style="width:100%; padding:10px; border-radius:8px; background:var(--card); color:var(--ink); border:1px solid var(--line); font-family:inherit;"></textarea>
+        </div>
 
-          <button class="btn block" type="submit" style="margin-top:15px;">Launch Campaign</button>
-        </form>
-      </div>
-    </aside>
+        <button class="btn block" type="submit" style="margin-top:15px;">Launch Campaign</button>
+      </form>
+    </div>
   </div>
+
 
 <!-- TAB SECTION 4: AUDIT TRAILS LOGS -->
 <?php else: ?>

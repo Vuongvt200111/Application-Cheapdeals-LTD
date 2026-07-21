@@ -20,7 +20,27 @@ class StaffController extends BaseController {
         $tab = $_GET['tab'] ?? 'packages';
         $pkgs = Package::getAll();
         $prods = Product::getAll();
-        $orders = Order::getAll();
+        // --- XỬ LÝ PHỄU LỌC VÀ SẮP XẾP CHO TAB ORDERS (BUG-Nam/Orders) ---
+        $filterCustomer = trim($_GET['f_customer'] ?? '');
+        $sortTotal = $_GET['s_total'] ?? '';
+        
+        $sql = 'SELECT o.*, u.name customer, u.email FROM orders o JOIN users u ON u.id=o.user_id';
+        $params = [];
+        if ($filterCustomer !== '') {
+            $sql .= ' WHERE u.name LIKE ?';
+            $params[] = '%' . $filterCustomer . '%';
+        }
+        if ($sortTotal === 'desc') {
+            $sql .= ' ORDER BY o.total DESC';
+        } elseif ($sortTotal === 'asc') {
+            $sql .= ' ORDER BY o.total ASC';
+        } else {
+            $sql .= ' ORDER BY o.id DESC';
+        }
+        
+        $s_ord = $this->pdo->prepare($sql);
+        $s_ord->execute($params);
+        $orders = $s_ord->fetchAll();
         $vouchers = Voucher::getAll();
         $threads = Ticket::getAllThreads();
         
@@ -49,7 +69,9 @@ class StaffController extends BaseController {
             'uid' => $uid,
             'chat_msgs' => $chat_msgs,
             'requirements' => $requirements,
-            'escMap' => $escMap
+            'escMap' => $escMap,
+            'filterCustomer' => $filterCustomer,
+            'sortTotal' => $sortTotal
         ]);
     }
 

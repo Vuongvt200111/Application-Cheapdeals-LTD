@@ -5,7 +5,7 @@
   .screen{padding-bottom:70px}
   #toast{bottom:84px}
   .bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:80;background:rgba(7,11,22,.92);backdrop-filter:blur(10px);border-top:1px solid var(--neon);
-    padding:6px 4px;padding-bottom:calc(6px + var(--safe-b));box-shadow:0 -4px 22px rgba(0,229,255,.20)}
+    padding:6px 4px;padding-bottom:calc(6px + var(--safe-b));box-shadow:0 -4px 22px var(--glow-20)}
   .bottom-nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;color:var(--muted);
     font-size:11px;font-weight:600;border-radius:12px;transition:.15s;cursor:pointer}
   .bottom-nav a .ic{font-size:21px;line-height:1}
@@ -23,7 +23,7 @@
     body{display:flex;align-items:flex-start;justify-content:center;min-height:100vh;padding:26px 16px}
     .device{position:relative;width:430px;height:calc(100vh - 52px);max-height:920px;
       border:2px solid var(--neon);border-radius:46px;overflow:hidden;background:var(--bg);
-      box-shadow:0 0 0 10px #05070d,0 0 30px rgba(0,229,255,.35),0 26px 60px rgba(0,0,0,.6)}
+      box-shadow:0 0 0 10px #05070d,0 0 30px var(--glow-35),0 26px 60px rgba(0,0,0,.6)}
     .device::before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
       width:150px;height:26px;background:#05070d;border-radius:0 0 16px 16px;z-index:60}
     .screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden}

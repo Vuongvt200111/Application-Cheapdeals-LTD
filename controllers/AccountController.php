@@ -133,6 +133,33 @@ class AccountController extends BaseController {
                          
                 redirect('account.php?tab=reviews&msg=' . urlencode('Review submitted successfully.'));
             }
+            
+            if ($act === 'deleteReview') {
+                $id = (int)$_POST['id'];
+                
+                $s_itm = $this->pdo->prepare('SELECT item_code FROM reviews WHERE id=? AND user_id=?');
+                $s_itm->execute([$id, $this->me['id']]);
+                $item_code = $s_itm->fetchColumn();
+                
+                if ($item_code) {
+                    $this->pdo->prepare('DELETE FROM reviews WHERE id=? AND user_id=?')->execute([$id, $this->me['id']]);
+                    
+                    $is_pkg = (Package::getByCode($item_code) !== null);
+                    $table = $is_pkg ? 'packages' : 'products';
+                    
+                    $s_avg = $this->pdo->prepare('SELECT AVG(rating), COUNT(*) FROM reviews WHERE item_code=?');
+                    $s_avg->execute([$item_code]);
+                    $avg = $s_avg->fetch();
+                    
+                    $avg_score = $avg[0] !== null ? round((float)$avg[0], 2) : 0.00;
+                    $avg_count = (int)$avg[1];
+                    
+                    $this->pdo->prepare("UPDATE `$table` SET rating_score=?, rating_count=? WHERE code=?")
+                             ->execute([$avg_score, $avg_count, $item_code]);
+                }
+                
+                redirect('account.php?tab=reviews&msg=' . urlencode('Review deleted successfully.'));
+            }
         }
 
         $tab = $_GET['tab'] ?? 'overview';
@@ -146,6 +173,30 @@ class AccountController extends BaseController {
                 if ($p) {
                     $wishlist_items[] = $p;
                 }
+            }
+            
+            // Fetch confirmed custom requirements (BUG-022)
+            $s_req = $this->pdo->prepare("SELECT * FROM custom_requirements WHERE user_id=? AND status='Confirmed' ORDER BY id DESC");
+            $s_req->execute([$this->me['id']]);
+            $confirmed_reqs = $s_req->fetchAll();
+            foreach ($confirmed_reqs as $req) {
+                $wishlist_items[] = [
+                    'code' => 'custom',
+                    'name' => $req['name'],
+                    'price' => (float)$req['price'],
+                    'features' => json_encode(array_values(array_filter([
+                        $req['device'] !== 'No device' ? 'Device: ' . $req['device'] : null,
+                        $req['minutes'] !== 'None' ? 'Minutes: ' . $req['minutes'] : null,
+                        $req['data'] !== 'None' ? 'Data: ' . $req['data'] : null,
+                        $req['sms'] ? 'SMS: ' . $req['sms'] : null,
+                        $req['addons'] ? 'Add-ons: ' . $req['addons'] : null,
+                    ]))),
+                    'sales_count' => 0,
+                    'rating_score' => 5.0,
+                    'rating_count' => 0,
+                    'inventory' => 'Unlimited',
+                    'is_custom_req' => true
+                ];
             }
         }
 

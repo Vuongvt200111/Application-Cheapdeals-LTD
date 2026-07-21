@@ -15,7 +15,7 @@ require __DIR__ . '/../layout/header.php';
 
 <div class="panel" style="max-width:640px; margin-top: 15px;">
     <!-- Chat log window -->
-    <div class="chat" style="height:350px; overflow-y:auto; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--bg);">
+    <div class="chat" style="height:350px; overflow-y:auto; padding:10px; border:1px solid var(--line); border-radius:8px; background:transparent;">
         <?php if (!$msgs): ?>
             <p class="lead" style="margin:10px">Chat session established. Send a message to start! 👋</p>
         <?php endif; ?>

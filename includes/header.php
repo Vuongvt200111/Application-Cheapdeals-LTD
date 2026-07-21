@@ -3,7 +3,7 @@ require_once __DIR__ . '/auth.php';   // $pdo, $CFG, $ME, helpers
 
 /* nav items by role: [file, label, icon] */
 function navItems($me){
-  if (!$me) return [['index.php','Packages','📦'],['build.php','Build','🛠️'],['offers.php','Offers','🏷️'],['login.php','Login','🔑'],['register.php','Sign up','✍️']];
+  if (!$me) return [['index.php','Packages','📦'],['build.php','Build','🛠️'],['login.php','Login','🔑'],['register.php','Sign up','✍️']];
   if ($me['role']==='user')  return [['index.php','Packages','📦'],['build.php','Build','🛠️'],['offers.php','Offers','🏷️'],['support.php','Support','💬'],['account.php','Account','👤']];
   if ($me['role']==='staff') return [['index.php','Packages','📦'],['staff.php','Staff','🧰']];
   return [['index.php','Packages','📦'],['admin.php','Admin','🛡️'],['staff.php','Staff','🧰']];

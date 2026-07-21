@@ -5,6 +5,7 @@ require __DIR__ . '/../layout/header.php';
 <script>
   window.ACTIVE_CAMPAIGNS = <?= json_encode($campaigns) ?>;
   window.IS_FIRST_ORDER = <?= count($orders) === 0 ? 'true' : 'false' ?>;
+  window.HAS_PAYMENT_PIN = <?= !empty($ME['payment_pin_hash']) ? 'true' : 'false' ?>;
 </script>
 
 <h2 class="title">Checkout</h2>

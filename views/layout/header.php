@@ -15,7 +15,7 @@ function navItems($me){
     if ($view === 'mobile') {
       return [['index.php','Packages','📦'],['build.php','Build','🛠️'],['cart.php','Cart' . $cartCount,'🛒'],['login.php','Login','🔑']];
     }
-    return [['index.php','Packages','📦'],['build.php','Build','🛠️'],['offers.php','Offers','🏷️'],['cart.php','Cart' . $cartCount,'🛒'],['login.php','Login','🔑'],['register.php','Sign up','✍️']];
+    return [['index.php','Packages','📦'],['build.php','Build','🛠️'],['cart.php','Cart' . $cartCount,'🛒'],['login.php','Login','🔑'],['register.php','Sign up','✍️']];
   }
   if ($me['role']==='user')  return [['index.php','Packages','📦'],['build.php','Build','🛠️'],['offers.php','Offers','🏷️'],['cart.php','Cart' . $cartCount,'🛒'],['support.php','Support','💬'],['account.php','Account','👤']];
   if ($me['role']==='staff') return [['index.php','Packages','📦'],['staff.php','Staff','🧰']];

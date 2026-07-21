@@ -54,7 +54,7 @@
     if (compareView) compareView.style.display = v === 'compare' ? '' : 'none';
   }));
   const catTabs = document.querySelectorAll('#compareCatTabs a');
-  const cmpTables = document.querySelectorAll('.cmp-table');
+  const cmpTables = document.querySelectorAll('.cmp-table[data-cmpcat]');
   catTabs.forEach(t => t.addEventListener('click', () => {
     catTabs.forEach(x => x.classList.toggle('active', x === t));
     cmpTables.forEach(tbl => { tbl.style.display = tbl.dataset.cmpcat === t.dataset.cmpcat ? '' : 'none'; });
