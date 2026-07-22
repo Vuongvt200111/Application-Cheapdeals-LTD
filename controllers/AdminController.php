@@ -118,7 +118,12 @@ class AdminController extends BaseController {
             $campaigns = $this->pdo->query('SELECT * FROM campaigns ORDER BY id DESC')->fetchAll();
         }
         elseif ($tab === 'audit') {
-            $logs = $this->pdo->query('SELECT * FROM audit_logs ORDER BY id DESC LIMIT 100')->fetchAll();
+            $logs = $this->pdo->query("
+                SELECT id, NULL as user_id, actor as user_email, action, detail, created_at FROM audit_log
+                UNION ALL
+                SELECT id, user_id, user_email, action, detail, created_at FROM audit_logs
+                ORDER BY created_at DESC, id DESC LIMIT 100
+            ")->fetchAll();
         }
 
         $this->render('admin/dashboard', [

@@ -66,9 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
           currentMsgCount = msgs.length;
           chatDiv.scrollTop = chatDiv.scrollHeight;
         } else {
-          // If the last message was from user, show typing feedback
+          // Show typing indicator briefly for 6s after user sends, then hide if no staff response
           if (msgs.length > 0 && msgs[msgs.length - 1].sender === 'user') {
-            showTypingIndicator();
+            const lastTime = new Date(msgs[msgs.length - 1].created_at).getTime();
+            const nowTime = new Date().getTime();
+            if (isNaN(lastTime) || (nowTime - lastTime < 8000)) {
+              showTypingIndicator();
+            } else {
+              removeTypingIndicator();
+            }
           } else {
             removeTypingIndicator();
           }

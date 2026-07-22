@@ -242,9 +242,10 @@ if (!function_exists('validateCardExpiry')) {
 
 /* FR38 - append-only audit logger (never throws into the page). */
 function audit($pdo, $actor, $action, $detail){
-  try { $pdo->prepare('INSERT INTO audit_log(actor,action,detail) VALUES (?,?,?)')
-            ->execute([$actor, $action, $detail]); }
-  catch (Throwable $e) { /* logging must never break the request */ }
+  try { $pdo->prepare('INSERT INTO audit_log(actor,action,detail) VALUES (?,?,?)')->execute([$actor, $action, $detail]); }
+  catch (Throwable $e) {}
+  try { $pdo->prepare('INSERT INTO audit_logs(user_email,action,detail) VALUES (?,?,?)')->execute([$actor, $action, $detail]); }
+  catch (Throwable $e) {}
 }
 
 if (!function_exists('tableColumnExists')) {

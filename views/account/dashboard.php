@@ -121,7 +121,7 @@ if (!empty($orders)) {
       
       <div class="two-col">
         <div class="fg"><label>Telephone</label><input name="phone" value="<?= esc($ME['phone']) ?>" required></div>
-        <div class="fg"><label>Credit card number</label><input name="card" maxlength="19" value="<?= esc($ME['card']) ?>" required></div>
+        <div class="fg"><label>Credit card number (optional)</label><input name="card" maxlength="19" value="<?= esc($ME['card']) ?>" placeholder="Leave empty if not set"></div>
       </div>
       
       <!-- PIN management (BUG-031) -->

@@ -35,7 +35,11 @@ ob_start(); ?>
   <button class="theme-btn" id="themeBtn" type="button" title="Theme">🌙</button>
   <a class="theme-btn" href="<?= esc($toggleHref) ?>" title="Switch interface"><?= $toggleLabel ?></a>
   <?php if ($ME): ?>
-    <span class="avatar"><?= esc(strtoupper(substr($ME['name'],0,1))) ?></span>
+    <?php if (!empty($ME['avatar'])): ?>
+      <img src="<?= esc($ME['avatar']) ?>" style="width:28px; height:28px; border-radius:50%; object-fit:cover; vertical-align:middle; border:1px solid var(--neon);" title="<?= esc($ME['name']) ?>" />
+    <?php else: ?>
+      <span class="avatar"><?= esc(strtoupper(substr($ME['name'],0,1))) ?></span>
+    <?php endif; ?>
     <?php if ($ME['role']!=='user'): ?><span class="role-badge role-<?= esc($ME['role']) ?>"><?= esc($ME['role']) ?></span><?php endif; ?>
     <a class="btn sec small" href="logout.php">Sign out</a>
   <?php endif;

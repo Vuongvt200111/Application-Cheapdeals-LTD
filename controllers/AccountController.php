@@ -23,13 +23,13 @@ class AccountController extends BaseController {
                 $s_save = $this->pdo->prepare('INSERT INTO email_verifications (email, code) VALUES (?, ?) ON DUPLICATE KEY UPDATE code = VALUES(code)');
                 $s_save->execute([$this->me['email'], $code]);
                 
-                $logPath = 'C:/Users/admin/.gemini/antigravity/brain/bdc7f455-ab25-4e53-9789-454d163d6bb2/scratch/email_codes.log';
+                $logPath = dirname(__DIR__) . '/email_codes.log';
                 @file_put_contents($logPath, "[" . date('Y-m-d H:i:s') . "] [" . $this->me['email'] . "] Security Code: $code\n", FILE_APPEND);
                 try {
                     @mail($this->me['email'], "CheapDeals Security Verification Code", "Your verification code is: $code", "From: no-reply@cheapdeals.com");
                 } catch (Throwable $e) {}
                 
-                echo json_encode(['success' => true, 'message' => 'Verification code sent to your email. Check scratch/email_codes.log.']);
+                echo json_encode(['success' => true, 'message' => 'Verification code sent! (Check email_codes.log in project root if local SMTP is off)']);
                 exit;
             }
         }
@@ -51,6 +51,13 @@ class AccountController extends BaseController {
                         }
                         if (move_uploaded_file($tmpName, $destDir . '/' . $newName)) {
                             $avatarPath = 'uploads/' . $newName;
+                            // Sync to htdocs if running on XAMPP
+                            foreach (['C:/xampp/htdocs/cheapdeals-v3/uploads', 'C:/xampp/htdocs/cheapdeals/uploads'] as $hdir) {
+                                if (is_dir(dirname($hdir))) {
+                                    if (!is_dir($hdir)) @mkdir($hdir, 0777, true);
+                                    @copy($destDir . '/' . $newName, $hdir . '/' . $newName);
+                                }
+                            }
                         }
                     }
                 }

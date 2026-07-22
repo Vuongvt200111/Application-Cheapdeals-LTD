@@ -7,7 +7,7 @@ function sendVerificationEmail($email, $code) {
     $subject = "CheapDeals Account Verification Code";
     $message = "Your 6-digit verification code is: $code";
     $headers = "From: no-reply@cheapdeals.com";
-    $logPath = 'C:/Users/admin/.gemini/antigravity/brain/bdc7f455-ab25-4e53-9789-454d163d6bb2/scratch/email_codes.log';
+    $logPath = __DIR__ . '/email_codes.log';
     @file_put_contents($logPath, "[" . date('Y-m-d H:i:s') . "] [$email] Code: $code\n", FILE_APPEND);
     try {
         @mail($email, $subject, $message, $headers);
@@ -32,7 +32,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'send_code') {
     $s_save = $pdo->prepare('INSERT INTO email_verifications (email, code) VALUES (?, ?) ON DUPLICATE KEY UPDATE code = VALUES(code)');
     $s_save->execute([$email, $code]);
     sendVerificationEmail($email, $code);
-    echo json_encode(['success' => true, 'message' => 'Code sent! Check scratch/email_codes.log if SMTP is not configured.']);
+    echo json_encode(['success' => true, 'message' => 'Code sent! (Check email_codes.log in project root if local SMTP is off)']);
     exit;
 }
 
