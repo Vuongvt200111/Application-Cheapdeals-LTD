@@ -167,8 +167,8 @@ require __DIR__ . '/../layout/header.php';
 <?php if (!empty($recs)): ?>
 <div class="recommendations-block" id="recommendationsBlock">
   <h2 class="title" style="display:flex; justify-content:space-between; align-items:center; font-size:18px; margin-bottom:10px;">
-    Gợi ý dành riêng cho bạn (Recommended for You)
-    <button class="btn sec small" id="clearHistoryBtn" style="font-size:11px; padding:4px 8px;">Xóa lịch sử (Clear)</button>
+    Recommended for You
+    <button class="btn sec small" id="clearHistoryBtn" style="font-size:11px; padding:4px 8px;">Clear</button>
   </h2>
   <div class="grid">
     <?php foreach ($recs as $p): 

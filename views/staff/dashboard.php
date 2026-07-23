@@ -28,7 +28,7 @@ require __DIR__ . '/../layout/header.php';
             <input name="price" type="number" step="0.01" value="<?= $p['price'] ?>" style="width:80px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)">
           </td>
           <td>
-            <input name="inventory" type="number" value="<?= $p['inventory'] ?>" style="width:70px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)">
+            <input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" value="<?= $p['inventory'] ?>" style="width:70px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)">
           </td>
           <td>
             <button class="btn small" type="submit">Save</button>
@@ -56,7 +56,7 @@ require __DIR__ . '/../layout/header.php';
       </div>
       <div class="two-col">
         <div class="fg"><label>Price (£/month)</label><input name="price" type="number" step="0.01" value="20" required></div>
-        <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" value="10" required></div>
+        <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" value="10" min="0" oninput="if(this.value<0)this.value=0;" required></div>
       </div>
       <div class="fg"><label>Features (one per line)</label><textarea name="features" rows="3" placeholder="1 mobile phone&#10;500 free minutes" required></textarea></div>
       <button class="btn" type="submit">Create option</button>
@@ -78,7 +78,7 @@ require __DIR__ . '/../layout/header.php';
             <input name="price" type="number" step="0.01" value="<?= $p['price'] ?>" style="width:80px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)">
           </td>
           <td>
-            <input name="inventory" type="number" value="<?= $p['inventory'] ?>" style="width:70px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)">
+            <input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" value="<?= $p['inventory'] ?>" style="width:70px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)">
           </td>
           <td>
             <textarea name="description" style="width:200px;height:45px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);font-size:11px;"><?= esc($p['description']) ?></textarea>
@@ -105,7 +105,7 @@ require __DIR__ . '/../layout/header.php';
       <div class="fg"><label>Product Name</label><input name="name" placeholder="e.g. CheapDeals Gaming Laptop" required></div>
       <div class="two-col">
         <div class="fg"><label>Price (£)</label><input name="price" type="number" step="0.01" value="29.99" required></div>
-        <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" value="10" required></div>
+        <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" value="10" min="0" oninput="if(this.value<0)this.value=0;" required></div>
       </div>
       <div class="fg"><label>Product Description</label><textarea name="description" rows="3" placeholder="Enter short product specifications..." required></textarea></div>
       <button class="btn" type="submit">Create Hardware</button>
@@ -255,7 +255,7 @@ require __DIR__ . '/../layout/header.php';
 <?php elseif ($tab === 'vouchers'): ?>
   <!-- BỔ SUNG CHO FR30: Cải tiến giao diện chọn tệp phân khúc khách hàng mục tiêu (Generate a voucher removed per user request) -->
   <div class="panel" style="max-width:560px; margin-top: 0;">
-    <h3 class="sec-h" style="margin-top:0">🎟️ Demographic Cohort Campaign Panel (FR30)</h3>
+    <h3 class="sec-h" style="margin-top:0">🎟️ Potential member benefits</h3>
     <p class="lead" style="margin-top:0">Filter users by consumption logs and dispatch a targeted voucher campaign code instantly.</p>
     <form method="post" style="display:flex; flex-direction:column; gap:12px;">
       <input type="hidden" name="act" value="issueCohortVoucher">

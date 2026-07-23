@@ -153,3 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 });
+
+
+// Auto pre-fill inquiry package from URL parameter
+(function(){
+  const urlParams = new URLSearchParams(window.location.search);
+  const pkg = urlParams.get('inquire_pkg');
+  if (pkg) {
+    const chatInput = document.querySelector('#chat-input, input[name="message"], textarea[name="message"]');
+    if (chatInput) {
+      chatInput.value = "Hi, I would like to inquire about the package: " + decodeURIComponent(pkg);
+      chatInput.focus();
+    }
+  }
+})();

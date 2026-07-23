@@ -100,7 +100,7 @@ if (!empty($orders)) {
     <div class="stats" style="margin-top: 15px;">
       <div class="stat" style="grid-column: span 3;"><div class="num" style="color:var(--brand)"><?= $points ?></div><div class="lab">Loyalty Points Available (£<?= number_format($points, 2) ?> discount)</div></div>
     </div>
-    <div class="hint">Every order via the app saves you 15% automatically and earns you 1% reward points!</div>
+    <div class="hint">Your first order will automatically save you 15% and earn you reward points!</div>
 
   <?php elseif ($tab === 'personal'): ?>
     <div class="acc-head">✏️ Personal Info</div>
@@ -120,7 +120,7 @@ if (!empty($orders)) {
       <div class="fg"><label>Address</label><input name="address" value="<?= esc($ME['address']) ?>" required></div>
       
       <div class="two-col">
-        <div class="fg"><label>Telephone</label><input name="phone" value="<?= esc($ME['phone']) ?>" required></div>
+        <div class="fg"><label>Telephone</label><input name="phone" maxlength="10" pattern="[0-9]{10}" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" value="<?= esc($ME['phone']) ?>" required></div>
         <div class="fg"><label>Credit card number (optional)</label><input name="card" maxlength="19" value="<?= esc($ME['card']) ?>" placeholder="Leave empty if not set"></div>
       </div>
       
@@ -410,5 +410,31 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     });
   }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.btn-cancel-order').forEach(function(btn){
+    const createdStr = btn.dataset.created;
+    if (!createdStr) return;
+    const createdTime = new Date(createdStr).getTime();
+    const deadline = createdTime + (15 * 60 * 1000);
+    const badge = btn.nextElementSibling;
+
+    function updateTimer() {
+      const now = new Date().getTime();
+      const diff = deadline - now;
+      if (diff <= 0) {
+        btn.style.display = 'none';
+        if (badge) badge.innerText = '(Hạn hủy 15p hết)';
+      } else {
+        const m = Math.floor(diff / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        if (badge) badge.innerText = '(Còn ' + m + ':' + (s < 10 ? '0' : '') + s + ' để hủy)';
+      }
+    }
+    updateTimer();
+    setInterval(updateTimer, 1000);
+  });
 });
 </script>

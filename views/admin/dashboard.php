@@ -65,7 +65,7 @@ require __DIR__ . '/../layout/header.php';
                       <option value="<?= $r ?>" <?= $r===$u['role']?'selected':'' ?>><?= $r ?></option>
                     <?php endforeach; ?>
                   </select>
-                <div class="fg"><label>Min Data Usage Threshold (GB)</label><input name="min_data_gb" type="number" min="0" placeholder="e.g. 20"></div>
+                
 </form>
               <?php endif; ?>
             </td>
@@ -115,7 +115,7 @@ require __DIR__ . '/../layout/header.php';
                     <button type="submit" class="btn small danger" style="padding:2px 8px;">
                       Delete
                     </button>
-                  <div class="fg"><label>Min Data Usage Threshold (GB)</label><input name="min_data_gb" type="number" min="0" placeholder="e.g. 20"></div>
+                  
 </form>
                 </td>
               </tr>
@@ -167,7 +167,7 @@ require __DIR__ . '/../layout/header.php';
         </div>
 
         <button class="btn block" type="submit" style="margin-top:15px;">Launch Campaign</button>
-      <div class="fg"><label>Min Data Usage Threshold (GB)</label><input name="min_data_gb" type="number" min="0" placeholder="e.g. 20"></div>
+      
 </form>
     </div>
   </div>

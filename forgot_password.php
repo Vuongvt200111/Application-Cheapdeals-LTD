@@ -115,7 +115,18 @@ require __DIR__ . '/includes/header.php';
       <input type="hidden" name="validated_email" value="<?= esc($email_validated) ?>">
       <div class="fg">
         <label>New Password</label>
-        <input name="password" type="password" required>
+        <input name="password" id="reset-pwd-input" type="password" required>
+<div style="margin-top:6px;">
+            <div style="height:6px;background:#333;border-radius:3px;overflow:hidden;margin-bottom:4px;">
+              <div id="pwd-meter-bar" style="height:100%;width:0%;background:#e74c3c;transition:all 0.3s;"></div>
+            </div>
+            <div style="font-size:0.8rem;display:flex;gap:10px;color:var(--text-muted);">
+              <span id="chk-len">✕ Min 6 chars</span>
+              <span id="chk-upper">✕ Uppercase</span>
+              <span id="chk-num">✕ Number</span>
+              <span id="chk-spec">✕ Special char</span>
+            </div>
+          </div>
       </div>
       <div class="fg">
         <label>Confirm New Password</label>
@@ -191,3 +202,33 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const pwdInput = document.getElementById('reset-pwd-input');
+  const bar = document.getElementById('pwd-meter-bar');
+  const chkLen = document.getElementById('chk-len');
+  const chkUpper = document.getElementById('chk-upper');
+  const chkNum = document.getElementById('chk-num');
+  const chkSpec = document.getElementById('chk-spec');
+
+  if(pwdInput && bar){
+    pwdInput.addEventListener('input', function(){
+      const val = pwdInput.value;
+      const hasLen = val.length >= 6;
+      const hasUpper = /[A-Z]/.test(val);
+      const hasNum = /[0-9]/.test(val);
+      const hasSpec = /[\W_]/.test(val);
+
+      chkLen.innerHTML = (hasLen ? '✓' : '✕') + ' Min 6 chars'; chkLen.style.color = hasLen ? '#2ecc71' : '#e74c3c';
+      chkUpper.innerHTML = (hasUpper ? '✓' : '✕') + ' Uppercase'; chkUpper.style.color = hasUpper ? '#2ecc71' : '#e74c3c';
+      chkNum.innerHTML = (hasNum ? '✓' : '✕') + ' Number'; chkNum.style.color = hasNum ? '#2ecc71' : '#e74c3c';
+      chkSpec.innerHTML = (hasSpec ? '✓' : '✕') + ' Special char'; chkSpec.style.color = hasSpec ? '#2ecc71' : '#e74c3c';
+
+      let score = (hasLen?1:0) + (hasUpper?1:0) + (hasNum?1:0) + (hasSpec?1:0);
+      bar.style.width = (score / 4 * 100) + '%';
+      bar.style.background = score <= 1 ? '#e74c3c' : score <= 3 ? '#f39c12' : '#2ecc71';
+    });
+  }
+});
+</script>
