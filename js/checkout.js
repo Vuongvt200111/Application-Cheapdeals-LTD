@@ -439,3 +439,13 @@
     showPaymentPinModal(proceedWithPayment);
   });
 })();
+
+
+  // Auto-format Card Expiry MM/YY
+  document.querySelectorAll('input[placeholder*="MM/YY"]').forEach(function(expInput){
+    expInput.addEventListener('input', function(e){
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length >= 2) v = v.slice(0, 2) + '/' + v.slice(2, 4);
+      e.target.value = v;
+    });
+  });

@@ -35,3 +35,30 @@ audit($pdo, $ME['email'], 'order_cancelled', 'Order #' . $orderId . ' (' . $orde
 audit($pdo, $ME['email'], 'refund_webhook', 'Refund webhook fired for order #' . $orderId . ' — ref ' . $refundRef . ', amount ' . gbp($order['total']) . '.');
 
 redirect('account.php?tab=billing&msg=' . urlencode('Order cancelled and £' . number_format($order['total'], 2) . ' refunded (ref ' . $refundRef . ').'));
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const btnCancel = document.querySelector('.btn-cancel-order');
+  if (btnCancel && btnCancel.dataset.deadline) {
+    const dl = new Date(btnCancel.dataset.deadline).getTime();
+    const timerSpan = document.createElement('span');
+    timerSpan.style.marginLeft = '10px';
+    timerSpan.style.color = '#f1c40f';
+    btnCancel.parentNode.insertBefore(timerSpan, btnCancel.nextSibling);
+
+    const interval = setInterval(function(){
+      const now = new Date().getTime();
+      const diff = dl - now;
+      if (diff <= 0) {
+        clearInterval(interval);
+        btnCancel.style.display = 'none';
+        timerSpan.innerText = '(Hạn hủy 15 phút đã hết)';
+      } else {
+        const m = Math.floor(diff / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        timerSpan.innerText = '(Còn ' + m + ':' + (s < 10 ? '0' : '') + s + ' để hủy)';
+      }
+    }, 1000);
+  }
+});
+</script>

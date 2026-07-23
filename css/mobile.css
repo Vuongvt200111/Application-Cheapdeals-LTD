@@ -50,3 +50,10 @@
   grid-template-columns: 1fr !important;
 }
 
+
+@media (max-width: 768px) {
+  h1, .hero-title, .title { font-size: 1.6rem !important; line-height: 1.25 !important; }
+  .slider-group { flex-wrap: wrap !important; width: 100% !important; }
+  .byo-control input[type=range] { width: 100% !important; }
+  .cart-table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+}

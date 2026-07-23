@@ -37,6 +37,15 @@
     cat = ch.dataset.cat; chips.forEach(x => x.classList.toggle('active', x===ch)); apply();
   }));
   if (sortSel) sortSel.addEventListener('change', apply);
+  const clearBtn = document.getElementById('btn-clear-filters');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      cat = 'All'; q = '';
+      if (search) search.value = '';
+      chips.forEach(x => x.classList.toggle('active', x.dataset.cat === 'All'));
+      apply();
+    });
+  }
   if (search) search.addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); apply(); });
   apply();
 })();

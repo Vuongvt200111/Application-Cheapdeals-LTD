@@ -95,11 +95,23 @@ require __DIR__ . '/includes/header.php';
     
     <div class="two-col">
       <div class="fg"><label>Verification Code</label><input name="email_code" maxlength="6" placeholder="6-digit code" required></div>
-      <div class="fg"><label>Password</label><input name="password" type="password" required></div>
+      <div class="fg"><label>Password</label><input name="password" id="reg-password" type="password" required>
+        <div id="pwd-meter" style="margin-top:6px;display:none;">
+          <div style="height:6px;background:#333;border-radius:3px;overflow:hidden;margin-bottom:4px;">
+            <div id="pwd-meter-bar" style="height:100%;width:0%;background:#e74c3c;transition:all 0.3s;"></div>
+          </div>
+          <div style="font-size:0.8rem;display:flex;gap:10px;color:var(--text-muted);">
+            <span id="chk-len">✕ Min 6 chars</span>
+            <span id="chk-upper">✕ Uppercase</span>
+            <span id="chk-num">✕ Number</span>
+            <span id="chk-spec">✕ Special char</span>
+          </div>
+        </div>
+      </div>
     </div>
     
     <div class="fg"><label>Address</label><input name="address" required></div>
-    <div class="fg"><label>Telephone</label><input name="phone" required></div>
+    <div class="fg"><label>Telephone</label><input name="phone" type="tel" maxlength="10" pattern="[0-9]{10}" placeholder="e.g. 0912345678" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" required></div>
     
     <button class="btn block" type="submit" style="margin-top:15px;">Register</button>
   </form>
@@ -161,4 +173,57 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const pwdInput = document.getElementById('reg-password');
+  const meter = document.getElementById('pwd-meter');
+  const bar = document.getElementById('pwd-meter-bar');
+  const chkLen = document.getElementById('chk-len');
+  const chkUpper = document.getElementById('chk-upper');
+  const chkNum = document.getElementById('chk-num');
+  const chkSpec = document.getElementById('chk-spec');
+
+  if(pwdInput && meter){
+    pwdInput.addEventListener('input', function(){
+      const val = pwdInput.value;
+      if(!val){ meter.style.display = 'none'; return; }
+      meter.style.display = 'block';
+
+      const hasLen = val.length >= 6;
+      const hasUpper = /[A-Z]/.test(val);
+      const hasNum = /[0-9]/.test(val);
+      const hasSpec = /[\W_]/.test(val);
+
+      chkLen.innerHTML = (hasLen ? '✓' : '✕') + ' Min 6 chars'; chkLen.style.color = hasLen ? '#2ecc71' : '#e74c3c';
+      chkUpper.innerHTML = (hasUpper ? '✓' : '✕') + ' Uppercase'; chkUpper.style.color = hasUpper ? '#2ecc71' : '#e74c3c';
+      chkNum.innerHTML = (hasNum ? '✓' : '✕') + ' Number'; chkNum.style.color = hasNum ? '#2ecc71' : '#e74c3c';
+      chkSpec.innerHTML = (hasSpec ? '✓' : '✕') + ' Special char'; chkSpec.style.color = hasSpec ? '#2ecc71' : '#e74c3c';
+
+      let score = (hasLen?1:0) + (hasUpper?1:0) + (hasNum?1:0) + (hasSpec?1:0);
+      let pct = (score / 4) * 100;
+      bar.style.width = pct + '%';
+      bar.style.background = score <= 1 ? '#e74c3c' : score <= 3 ? '#f39c12' : '#2ecc71';
+    });
+  }
+
+  // 60s OTP Cooldown
+  const btnSend = document.getElementById('btn-send-code');
+  if(btnSend){
+    btnSend.addEventListener('click', function(){
+      let cd = 60;
+      btnSend.disabled = true;
+      const origText = btnSend.innerText;
+      const timer = setInterval(function(){
+        cd--;
+        btnSend.innerText = 'Resend in ' + cd + 's';
+        if(cd <= 0){
+          clearInterval(timer);
+          btnSend.disabled = false;
+          btnSend.innerText = origText;
+        }
+      }, 1000);
+    });
+  }
+});
+</script>
 <?php require __DIR__ . '/includes/footer.php'; ?>

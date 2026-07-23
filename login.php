@@ -20,7 +20,7 @@ require __DIR__ . '/includes/header.php';
   <?php if ($err): ?><div class="msg err"><?= esc($err) ?></div><?php endif; ?>
   <form method="post">
     <div class="fg"><label>Email</label><input name="email" type="email" required></div>
-    <div class="fg"><label>Password</label><input name="password" type="password" required></div>
+    <div class="fg"><label>Password <a href="forgot_password.php" style="float:right;font-size:0.85rem;color:var(--cyan);">Forgot Password?</a></label><input name="password" type="password" required></div>
     <div style="text-align:right; margin:-10px 0 15px;"><a href="forgot_password.php" style="font-size:13px; color:var(--brand);">Forgot password?</a></div>
     <button class="btn block" type="submit">Log in</button>
   </form>

@@ -427,3 +427,14 @@ html[data-theme="dark"]{
 html[data-theme="dark"] .role-admin{background:#3f1414;color:#fca5a5} html[data-theme="dark"] .role-staff{background:#1e3a8a;color:#bfdbfe} html[data-theme="dark"] .role-user{background:#0f3320;color:#86efac}
 html[data-theme="dark"] .tier-Lite{color:#cbd5e1;background:#334155}html[data-theme="dark"] .tier-Standard{color:#bfdbfe;background:#1e3a8a}html[data-theme="dark"] .tier-Premium{color:#ddd6fe;background:#4c1d95}html[data-theme="dark"] .tier-Deal{color:#fde68a;background:#78350f}
 html[data-theme="dark"] .msg.err{background:#3f1414;color:#fca5a5}
+
+/* Status Badges */
+.badge-status { display:inline-block; padding:4px 10px; border-radius:12px; font-size:0.8rem; font-weight:bold; }
+.badge-active { background:rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71; }
+.badge-suspended { background:rgba(241,196,15,0.2); color:#f1c40f; border:1px solid #f1c40f; }
+.badge-expired { background:rgba(149,165,166,0.2); color:#95a5a6; border:1px solid #95a5a6; }
+
+/* Equal Card Height & Footer Button Alignment */
+.card { display:flex; flex-direction:column; height:100%; }
+.card-body { flex:1; display:flex; flex-direction:column; }
+.card-footer, .card .btn-group { margin-top:auto; }

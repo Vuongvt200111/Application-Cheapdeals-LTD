@@ -398,3 +398,17 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <?php require __DIR__ . '/../layout/footer.php'; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const avInput = document.querySelector('input[name="avatar"]');
+  if (avInput) {
+    avInput.addEventListener('change', function(){
+      if (this.files && this.files[0] && this.files[0].size > 5242880) {
+        alert('File size exceeds 5MB limit. Please select a smaller avatar image.');
+        this.value = '';
+      }
+    });
+  }
+});
+</script>
