@@ -137,7 +137,35 @@ if (!function_exists('cd_category_summary')) {
       ];
     }
 }
-$primaryCats = ['Mobile', 'Broadband', 'Tablet', 'Bundles', 'Hardware'];
+$primaryCats = ['Data', 'Mobile', 'Broadband', 'Tablet', 'Bundles', 'Hardware'];
+
+// Seed Data Packages into $pkgs for Data Chip filtering
+$hasDataPkg = false;
+foreach ($pkgs as $p) { if ($p['category'] === 'Data') { $hasDataPkg = true; break; } }
+if (!$hasDataPkg) {
+    $dataPkgsSeed = [
+        ['id'=>101, 'name'=>'Hourly Data Plan - 3GB', 'category'=>'Data', 'tier'=>'Lite', 'price'=>2.50, 'purchased_count'=>1420, 'stock'=>25, 'features'=>"3GB High-Speed Data
+Valid for 6 hours
+Instant Activation"],
+        ['id'=>102, 'name'=>'1-Day Data Plan - 1.2GB', 'category'=>'Data', 'tier'=>'Lite', 'price'=>1.00, 'purchased_count'=>3850, 'stock'=>50, 'features'=>"1.2GB High-Speed Data
+Valid for 24 hours
+Auto-Renew Option"],
+        ['id'=>103, 'name'=>'1-Day 5G Data - 7GB', 'category'=>'Data', 'tier'=>'Standard', 'price'=>2.00, 'purchased_count'=>2100, 'stock'=>30, 'features'=>"7GB Ultra 5G Data
+Valid for 24 hours
+Unrestricted Tethering"],
+        ['id'=>104, 'name'=>'3-Day 5G Data - 25GB', 'category'=>'Data', 'tier'=>'Standard', 'price'=>4.00, 'purchased_count'=>1890, 'stock'=>40, 'features'=>"25GB Ultra 5G Data
+Valid for 3 days
+Priority Bandwidth"],
+        ['id'=>105, 'name'=>'7-Day 5G Data - 65GB', 'category'=>'Data', 'tier'=>'Premium', 'price'=>9.00, 'purchased_count'=>4210, 'stock'=>18, 'features'=>"65GB 5G Super Data
+Valid for 7 days
+Free Wi-Fi Hotspots"],
+        ['id'=>106, 'name'=>'30-Day Deal - 66GB', 'category'=>'Data', 'tier'=>'Premium', 'price'=>15.00, 'purchased_count'=>5600, 'stock'=>60, 'features'=>"66GB Data (2.2GB/day)
+Valid for 30 days
+Cashback reward: £1.50"]
+    ];
+    $pkgs = array_merge($pkgs, $dataPkgsSeed);
+}
+
 $byCat = [];
 foreach ($pkgs as $p) { $byCat[$p['category']][] = $p; }
 foreach ($prods as $p) { $byCat['Hardware'][] = $p; }
@@ -238,7 +266,7 @@ require __DIR__ . '/../layout/header.php';
 <h2 class="title">Browse packages &amp; deals</h2>
 <div class="toolbar">
   <div class="chips" id="chips">
-    <?php foreach (['All','Mobile','Broadband','Tablet','Bundles','Hardware'] as $c): ?>
+    <?php foreach (['All','Data','Mobile','Broadband','Tablet','Bundles','Hardware'] as $c): ?>
       <button class="chip <?= $c==='All'?'active':'' ?>" data-cat="<?= $c ?>"><?= $c ?></button>
     <?php endforeach; ?>
   </div>
