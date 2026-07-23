@@ -288,21 +288,25 @@ if (!empty($orders)) {
           <tr>
             <td><?= esc(substr($o['created_at'],0,10)) ?></td>
             <td>
-              <?php if (strpos($o['package_name'], 'Cart (') === 0): ?>
-                <?php
-                  $o_id = (int)$o['id'];
-                  $stmt_items = $pdo->prepare("SELECT item_name, count(*) as qty FROM order_items WHERE order_id = ? GROUP BY item_name");
-                  $stmt_items->execute([$o_id]);
-                  $items_list = $stmt_items->fetchAll();
-                  $item_names = [];
-                  foreach ($items_list as $it) {
-                      $item_names[] = esc($it['item_name']) . ($it['qty'] > 1 ? ' (x' . $it['qty'] . ')' : '');
-                  }
-                  echo implode(', ', $item_names);
-                ?>
-              <?php else: ?>
-                <?= esc($o['package_name']) ?>
-              <?php endif; ?>
+              <?php
+                if (strpos($o['package_name'], 'Cart (') === 0) {
+                    $o_id = (int)$o['id'];
+                    $stmt_items = $pdo->prepare("SELECT item_name, count(*) as qty FROM order_items WHERE order_id = ? GROUP BY item_name");
+                    $stmt_items->execute([$o_id]);
+                    $items_list = $stmt_items->fetchAll();
+                    if (!empty($items_list)) {
+                        $item_names = [];
+                        foreach ($items_list as $it) {
+                            $item_names[] = esc($it['item_name']) . ($it['qty'] > 1 ? ' (x' . $it['qty'] . ')' : '');
+                        }
+                        echo implode(', ', $item_names);
+                    } else {
+                        echo esc($o['package_name']);
+                    }
+                } else {
+                    echo esc($o['package_name']);
+                }
+              ?>
             </td>
             <td class="discount"><?= gbp($o['saved']) ?></td>
             <td><?= gbp($o['total']) ?></td>

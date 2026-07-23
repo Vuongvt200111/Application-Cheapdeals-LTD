@@ -36,7 +36,11 @@ class CheckoutController extends BaseController {
             }
             $n = 0; foreach ($cart as $it) $n += (int)$it['qty'];
             $cartTotal = 0; foreach ($cart as $it) $cartTotal += (float)$it['price'] * (int)$it['qty'];
-            $cartName = 'Cart (' . $n . ' item' . ($n === 1 ? '' : 's') . ')';
+            $cartItemNames = [];
+            foreach ($cart as $it) {
+                $cartItemNames[] = $it['name'] . ((int)$it['qty'] > 1 ? ' (x' . $it['qty'] . ')' : '');
+            }
+            $cartName = implode(', ', $cartItemNames);
             
             $opts[] = [
                 'code' => 'cart',
@@ -161,6 +165,14 @@ class CheckoutController extends BaseController {
         $hasHardware = false;
 
         if ($code === 'cart') {
+            $cart = $_SESSION['cart'] ?? [];
+            if (!empty($cart)) {
+                $cartItemNames = [];
+                foreach ($cart as $it) {
+                    $cartItemNames[] = $it['name'] . ((int)$it['qty'] > 1 ? ' (x' . $it['qty'] . ')' : '');
+                }
+                $name = implode(', ', $cartItemNames);
+            }
             $cart = $_SESSION['cart'] ?? [];
             if (empty($cart)) {
                 redirect('cart.php?msg=' . urlencode('Your cart is empty.'));
