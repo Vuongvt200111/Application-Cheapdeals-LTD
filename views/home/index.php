@@ -139,29 +139,95 @@ if (!function_exists('cd_category_summary')) {
 }
 $primaryCats = ['Data', 'Mobile', 'Broadband', 'Tablet', 'Bundles', 'Hardware'];
 
-// Seed Data Packages into $pkgs for Data Chip filtering
+// Seed Data Packages into $pkgs for Data Chip filtering (Clean titles, duration units, 0 initial reviews)
 $hasDataPkg = false;
-foreach ($pkgs as $p) { if ($p['category'] === 'Data') { $hasDataPkg = true; break; } }
+foreach ($pkgs as $p) { if (($p['category'] ?? '') === 'Data') { $hasDataPkg = true; break; } }
 if (!$hasDataPkg) {
     $dataPkgsSeed = [
-        ['id'=>101, 'name'=>'Hourly Data Plan - 3GB', 'category'=>'Data', 'tier'=>'Lite', 'price'=>2.50, 'purchased_count'=>1420, 'stock'=>25, 'features'=>"3GB High-Speed Data
-Valid for 6 hours
-Instant Activation"],
-        ['id'=>102, 'name'=>'1-Day Data Plan - 1.2GB', 'category'=>'Data', 'tier'=>'Lite', 'price'=>1.00, 'purchased_count'=>3850, 'stock'=>50, 'features'=>"1.2GB High-Speed Data
-Valid for 24 hours
-Auto-Renew Option"],
-        ['id'=>103, 'name'=>'1-Day 5G Data - 7GB', 'category'=>'Data', 'tier'=>'Standard', 'price'=>2.00, 'purchased_count'=>2100, 'stock'=>30, 'features'=>"7GB Ultra 5G Data
-Valid for 24 hours
-Unrestricted Tethering"],
-        ['id'=>104, 'name'=>'3-Day 5G Data - 25GB', 'category'=>'Data', 'tier'=>'Standard', 'price'=>4.00, 'purchased_count'=>1890, 'stock'=>40, 'features'=>"25GB Ultra 5G Data
-Valid for 3 days
-Priority Bandwidth"],
-        ['id'=>105, 'name'=>'7-Day 5G Data - 65GB', 'category'=>'Data', 'tier'=>'Premium', 'price'=>9.00, 'purchased_count'=>4210, 'stock'=>18, 'features'=>"65GB 5G Super Data
-Valid for 7 days
-Free Wi-Fi Hotspots"],
-        ['id'=>106, 'name'=>'30-Day Deal - 66GB', 'category'=>'Data', 'tier'=>'Premium', 'price'=>15.00, 'purchased_count'=>5600, 'stock'=>60, 'features'=>"66GB Data (2.2GB/day)
-Valid for 30 days
-Cashback reward: £1.50"]
+        [
+            'id' => 101,
+            'code' => 'data-hourly-3gb',
+            'name' => 'Data Plan - 3GB',
+            'unit' => 'Hourly',
+            'category' => 'Data',
+            'tier' => 'Lite',
+            'price' => 2.50,
+            'sales_count' => 0,
+            'rating_score' => 0.0,
+            'rating_count' => 0,
+            'inventory' => 0,
+            'features' => json_encode(["3GB High-Speed Data", "Valid for 6 hours", "Instant Activation"])
+        ],
+        [
+            'id' => 102,
+            'code' => 'data-1day-1.2gb',
+            'name' => 'Data Plan - 1.2GB',
+            'unit' => '1-Day',
+            'category' => 'Data',
+            'tier' => 'Lite',
+            'price' => 1.00,
+            'sales_count' => 0,
+            'rating_score' => 0.0,
+            'rating_count' => 0,
+            'inventory' => 0,
+            'features' => json_encode(["1.2GB High-Speed Data", "Valid for 24 hours", "Auto-Renew Option"])
+        ],
+        [
+            'id' => 103,
+            'code' => 'data-1day-7gb',
+            'name' => '5G Data - 7GB',
+            'unit' => '1-Day',
+            'category' => 'Data',
+            'tier' => 'Standard',
+            'price' => 2.00,
+            'sales_count' => 0,
+            'rating_score' => 0.0,
+            'rating_count' => 0,
+            'inventory' => 0,
+            'features' => json_encode(["7GB Ultra 5G Data", "Valid for 24 hours", "Unrestricted Tethering"])
+        ],
+        [
+            'id' => 104,
+            'code' => 'data-3day-25gb',
+            'name' => '5G Data - 25GB',
+            'unit' => '3-Day',
+            'category' => 'Data',
+            'tier' => 'Standard',
+            'price' => 4.00,
+            'sales_count' => 0,
+            'rating_score' => 0.0,
+            'rating_count' => 0,
+            'inventory' => 0,
+            'features' => json_encode(["25GB Ultra 5G Data", "Valid for 3 days", "Priority Bandwidth"])
+        ],
+        [
+            'id' => 105,
+            'code' => 'data-7day-65gb',
+            'name' => '5G Data - 65GB',
+            'unit' => '7-Day',
+            'category' => 'Data',
+            'tier' => 'Premium',
+            'price' => 9.00,
+            'sales_count' => 0,
+            'rating_score' => 0.0,
+            'rating_count' => 0,
+            'inventory' => 0,
+            'features' => json_encode(["65GB 5G Super Data", "Valid for 7 days", "Free Wi-Fi Hotspots"])
+        ],
+        [
+            'id' => 106,
+            'code' => 'data-30day-66gb',
+            'name' => '30-Day Deal - 66GB',
+            'unit' => '30-Day',
+            'category' => 'Data',
+            'tier' => 'Premium',
+            'price' => 15.00,
+            'sales_count' => 0,
+            'rating_score' => 0.0,
+            'rating_count' => 0,
+            'inventory' => 0,
+            'features' => json_encode(["66GB Data (2.2GB/day)", "Valid for 30 days", "Cashback reward: £1.50"])
+        ]
     ];
     $pkgs = array_merge($pkgs, $dataPkgsSeed);
 }
@@ -199,12 +265,17 @@ require __DIR__ . '/../layout/header.php';
     <button class="btn sec small" id="clearHistoryBtn" style="font-size:11px; padding:4px 8px;">Clear</button>
   </h2>
   <div class="grid">
-    <?php foreach ($recs as $p): 
-      $feat = isset($p['features']) ? (json_decode($p['features'], true) ?: []) : [$p['description']]; 
+    <?php foreach ($recs as $p):
+      $pCode = $p['code'] ?? ('rec-' . ($p['id'] ?? rand(100, 999)));
+      $pSales = $p['sales_count'] ?? 0;
+      $pRatingScore = $p['rating_score'] ?? 5.0;
+      $pRatingCount = $p['rating_count'] ?? 0;
+      $pInventory = $p['inventory'] ?? 10;
+      $feat = isset($p['features']) ? (is_array($p['features']) ? $p['features'] : (json_decode($p['features'], true) ?: [])) : [$p['description'] ?? ''];
       $is_pkg = isset($p['features']);
-      $wish_active = in_array($p['code'], $wishlist, true) ? 'active' : '';
+      $wish_active = in_array($pCode, $wishlist, true) ? 'active' : '';
     ?>
-      <div class="card" data-cat="<?= esc($p['category'] ?? 'Hardware') ?>" data-tier="<?= esc($p['tier'] ?? 'Hardware') ?>" data-price="<?= $p['price'] ?>" data-name="<?= esc($p['name']) ?>" data-sales="<?= $p['sales_count'] ?>" data-rating="<?= $p['rating_score'] ?>" data-id="<?= $p['id'] ?>">
+      <div class="card" data-cat="<?= esc($p['category'] ?? 'Hardware') ?>" data-tier="<?= esc($p['tier'] ?? 'Hardware') ?>" data-price="<?= $p['price'] ?>" data-name="<?= esc($p['name']) ?>" data-sales="<?= $pSales ?>" data-rating="<?= $pRatingScore ?>" data-id="<?= $p['id'] ?>">
         <div class="tags">
           <span class="tag cat"><?= esc($p['category'] ?? 'Hardware') ?></span>
           <span class="tag tier-<?= esc($p['tier'] ?? 'Deal') ?>"><?= esc($p['tier'] ?? 'Hardware') ?></span>
@@ -215,7 +286,7 @@ require __DIR__ . '/../layout/header.php';
                 $wish_attr = 'disabled style="opacity: 0.4; cursor: not-allowed; filter: grayscale(100%);"';
             }
           ?>
-          <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($p['code']) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
+          <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($pCode) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
         </div>
         <div class="card-visual cat-<?= strtolower($p['category'] ?? 'hardware') ?>" style="height:120px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,43,214,0.06)); overflow:hidden; border:1px solid rgba(0,229,255,0.12); position:relative;">
           <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name']) ?>
@@ -224,26 +295,30 @@ require __DIR__ . '/../layout/header.php';
         <div class="price"><?= gbp($p['price']) ?><?php if ($is_pkg): ?> <small>/ month</small><?php endif; ?></div>
         
         <div class="card-meta">
-          <span class="meta-sales">👤.<?= $p['sales_count'] ?> purchased</span>
-          <?php if ($p['rating_count'] > 0): ?>
-<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($p['code']) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> reviews)</a></span>
+          <span class="meta-sales">👤.<?= $pSales ?> purchased</span>
+          <?php if ($pRatingCount > 0): ?>
+<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($pCode) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($pRatingScore, 1) ?> (👤.<?= $pRatingCount ?> reviews)</a></span>
 <?php endif; ?>
-          <span class="meta-stock">📦 <?= $p['inventory'] ?> left</span>
+          <?php if (($p['category'] ?? '') === 'Data'): ?>
+        <span class="meta-stock" style="color:var(--cyan);">♾️ Unlimited Pass</span>
+      <?php else: ?>
+        <span class="meta-stock">📦 <?= $pInventory ?> left</span>
+      <?php endif; ?>
         </div>
 
         <ul><?php foreach ($feat as $f): ?><li><?= esc($f) ?></li><?php endforeach; ?></ul>
         <?php if (!$ME || !in_array($ME['role'], ['staff', 'admin'], true)): ?>
       <div class="pkg-actions-row" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <div style="display:flex; gap:8px; width:100%;">
-          <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+          <?php if (($p['category'] ?? '') !== 'Data' && (int)$pInventory <= 0): ?>
             <a class="btn" style="flex:2; background:#333 !important; color:#777 !important; border: 1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.7; text-decoration:none; display:flex; align-items:center; justify-content:center; text-transform:uppercase; font-size:12px; font-weight:bold;">Order this</a>
             <a class="btn sec" style="flex:1; background:#222 !important; color:#555 !important; border: 1px solid #333 !important; cursor:not-allowed; pointer-events:none; opacity:0.5; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
           <?php else: ?>
-            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
-            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($pCode) ?>">Order this</a>
+            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($pCode) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
           <?php endif; ?>
         </div>
-        <a class="btn" href="support.php?inquiry_code=<?= urlencode($p['code']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
+        <a class="btn" href="support.php?inquire_pkg=<?= urlencode($p['name']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
           Ask about this
         </a>
@@ -285,11 +360,17 @@ require __DIR__ . '/../layout/header.php';
 
 <div class="grid" id="plist">
 <?php 
-foreach ($pkgs as $p): 
-  $feat = json_decode($p['features'], true) ?: []; 
-  $wish_active = in_array($p['code'], $wishlist, true) ? 'active' : '';
+foreach ($pkgs as $p):
+  $pCode = $p['code'] ?? ('pkg-' . ($p['id'] ?? rand(100, 999)));
+  $pSales = $p['sales_count'] ?? 0;
+  $pRatingScore = $p['rating_score'] ?? 5.0;
+  $pRatingCount = $p['rating_count'] ?? 0;
+  $pInventory = $p['inventory'] ?? 10;
+  $featRaw = $p['features'] ?? '[]';
+  $feat = is_array($featRaw) ? $featRaw : (json_decode($featRaw, true) ?: []);
+  $wish_active = in_array($pCode, $wishlist, true) ? 'active' : '';
 ?>
-  <div class="card" data-cat="<?= esc($p['category']) ?>" data-tier="<?= esc($p['tier']) ?>" data-price="<?= $p['price'] ?>" data-name="<?= esc($p['name']) ?>" data-sales="<?= $p['sales_count'] ?>" data-rating="<?= $p['rating_score'] ?>" data-id="<?= $p['id'] ?>" onclick="logView('<?= esc($p['code']) ?>')">
+  <div class="card" data-cat="<?= esc($p['category']) ?>" data-tier="<?= esc($p['tier']) ?>" data-price="<?= $p['price'] ?>" data-name="<?= esc($p['name']) ?>" data-sales="<?= $pSales ?>" data-rating="<?= $pRatingScore ?>" data-id="<?= $p['id'] ?>" onclick="logView('<?= esc($pCode) ?>')">
     <div class="tags">
       <span class="tag cat"><?= esc($p['category']) ?></span>
       <span class="tag tier-<?= esc($p['tier']) ?>"><?= esc($p['tier']) ?></span>
@@ -300,35 +381,40 @@ foreach ($pkgs as $p):
             $wish_attr = 'disabled style="opacity: 0.4; cursor: not-allowed; filter: grayscale(100%);"';
         }
       ?>
-      <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($p['code']) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
+      <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($pCode) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
     </div>
     <div class="card-visual cat-<?= strtolower($p['category'] ?? 'hardware') ?>" style="height:120px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,43,214,0.06)); overflow:hidden; border:1px solid rgba(0,229,255,0.12); position:relative;">
       <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name']) ?>
     </div>
     <h3><?= esc($p['name']) ?></h3>
-    <div class="price"><?= gbp($p['price']) ?> <small>/ month</small></div>
+    <?php $unitLabel = $p['unit'] ?? (($p['category'] ?? '') === 'Data' ? 'Pass' : 'month'); ?>
+    <div class="price"><?= gbp($p['price']) ?> <small>/ <?= esc($unitLabel) ?></small></div>
     
     <div class="card-meta">
-      <span class="meta-sales">👤.<?= $p['sales_count'] ?> purchased</span>
-      <?php if ($p['rating_count'] > 0): ?>
-<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($p['code']) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> reviews)</a></span>
+      <span class="meta-sales">👤.<?= $pSales ?> purchased</span>
+      <?php if ($pRatingCount > 0): ?>
+<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($pCode) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($pRatingScore, 1) ?> (👤.<?= $pRatingCount ?> reviews)</a></span>
 <?php endif; ?>
-      <span class="meta-stock">📦 <?= $p['inventory'] ?> left</span>
+      <?php if (($p['category'] ?? '') === 'Data'): ?>
+        <span class="meta-stock" style="color:var(--cyan);">♾️ Unlimited Pass</span>
+      <?php else: ?>
+        <span class="meta-stock">📦 <?= $pInventory ?> left</span>
+      <?php endif; ?>
     </div>
 
     <ul><?php foreach ($feat as $f): ?><li><?= esc($f) ?></li><?php endforeach; ?></ul>
     <?php if (!$ME || !in_array($ME['role'], ['staff', 'admin'], true)): ?>
       <div class="pkg-actions-row" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <div style="display:flex; gap:8px; width:100%;">
-          <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+          <?php if (($p['category'] ?? '') !== 'Data' && (int)$pInventory <= 0): ?>
             <a class="btn" style="flex:2; background:#333 !important; color:#777 !important; border: 1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.7; text-decoration:none; display:flex; align-items:center; justify-content:center; text-transform:uppercase; font-size:12px; font-weight:bold;">Order this</a>
             <a class="btn sec" style="flex:1; background:#222 !important; color:#555 !important; border: 1px solid #333 !important; cursor:not-allowed; pointer-events:none; opacity:0.5; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
           <?php else: ?>
-            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
-            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($pCode) ?>">Order this</a>
+            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($pCode) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
           <?php endif; ?>
         </div>
-        <a class="btn" href="support.php?inquiry_code=<?= urlencode($p['code']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
+        <a class="btn" href="support.php?inquire_pkg=<?= urlencode($p['name']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
           Ask about this
         </a>
@@ -338,10 +424,17 @@ foreach ($pkgs as $p):
 <?php endforeach; ?>
 
 <?php 
-foreach ($prods as $p): 
-  $wish_active = in_array($p['code'], $wishlist, true) ? 'active' : '';
+foreach ($prods as $p):
+  $pCode = $p['code'] ?? ('prod-' . ($p['id'] ?? rand(100, 999)));
+  $pSales = $p['sales_count'] ?? 0;
+  $pRatingScore = $p['rating_score'] ?? 5.0;
+  $pRatingCount = $p['rating_count'] ?? 0;
+  $pInventory = $p['inventory'] ?? 10;
+  $featRaw = $p['features'] ?? '[]';
+  $feat = is_array($featRaw) ? $featRaw : (json_decode($featRaw, true) ?: []);
+  $wish_active = in_array($pCode, $wishlist, true) ? 'active' : '';
 ?>
-  <div class="card" data-cat="Hardware" data-tier="Hardware" data-price="<?= $p['price'] ?>" data-name="<?= esc($p['name']) ?>" data-sales="<?= $p['sales_count'] ?>" data-rating="<?= $p['rating_score'] ?>" data-id="<?= $p['id'] ?>" onclick="logView('<?= esc($p['code']) ?>')">
+  <div class="card" data-cat="Hardware" data-tier="Hardware" data-price="<?= $p['price'] ?>" data-name="<?= esc($p['name']) ?>" data-sales="<?= $pSales ?>" data-rating="<?= $pRatingScore ?>" data-id="<?= $p['id'] ?>" onclick="logView('<?= esc($pCode) ?>')">
     <div class="tags">
       <span class="tag cat">Hardware</span>
       <span class="tag tier-Deal">Device</span>
@@ -352,7 +445,7 @@ foreach ($prods as $p):
             $wish_attr = 'disabled style="opacity: 0.4; cursor: not-allowed; filter: grayscale(100%);"';
         }
       ?>
-      <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($p['code']) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
+      <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($pCode) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
     </div>
     <div class="card-visual cat-hardware" style="height:120px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,43,214,0.06)); overflow:hidden; border:1px solid rgba(0,229,255,0.12); position:relative;">
       <?= cd_render_illustration('Hardware', $p['name']) ?>
@@ -361,11 +454,15 @@ foreach ($prods as $p):
     <div class="price"><?= gbp($p['price']) ?></div>
     
     <div class="card-meta">
-      <span class="meta-sales">👤.<?= $p['sales_count'] ?> purchased</span>
-      <?php if ($p['rating_count'] > 0): ?>
-<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($p['code']) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($p['rating_score'], 1) ?> (👤.<?= $p['rating_count'] ?> reviews)</a></span>
+      <span class="meta-sales">👤.<?= $pSales ?> purchased</span>
+      <?php if ($pRatingCount > 0): ?>
+<span class="meta-rating"><a href="reviews.php?code=<?= urlencode($pCode) ?>" style="color:var(--brand); text-decoration:underline;">⭐ <?= number_format($pRatingScore, 1) ?> (👤.<?= $pRatingCount ?> reviews)</a></span>
 <?php endif; ?>
-      <span class="meta-stock">📦 <?= $p['inventory'] ?> left</span>
+      <?php if (($p['category'] ?? '') === 'Data'): ?>
+        <span class="meta-stock" style="color:var(--cyan);">♾️ Unlimited Pass</span>
+      <?php else: ?>
+        <span class="meta-stock">📦 <?= $pInventory ?> left</span>
+      <?php endif; ?>
     </div>
 
     <ul>
@@ -374,15 +471,15 @@ foreach ($prods as $p):
     <?php if (!$ME || !in_array($ME['role'], ['staff', 'admin'], true)): ?>
       <div class="pkg-actions-row" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
         <div style="display:flex; gap:8px; width:100%;">
-          <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+          <?php if (($p['category'] ?? '') !== 'Data' && (int)$pInventory <= 0): ?>
             <a class="btn" style="flex:2; background:#333 !important; color:#777 !important; border: 1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.7; text-decoration:none; display:flex; align-items:center; justify-content:center; text-transform:uppercase; font-size:12px; font-weight:bold;">Order this</a>
             <a class="btn sec" style="flex:1; background:#222 !important; color:#555 !important; border: 1px solid #333 !important; cursor:not-allowed; pointer-events:none; opacity:0.5; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
           <?php else: ?>
-            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order this</a>
-            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($p['code']) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
+            <a class="btn co-btn" style="flex:2;" href="checkout.php?code=<?= urlencode($pCode) ?>">Order this</a>
+            <a class="btn sec cart-btn" href="cart.php?add=<?= urlencode($pCode) ?>" title="Add to cart" style="flex:1; display:flex; align-items:center; justify-content:center; text-decoration:none;">🛒</a>
           <?php endif; ?>
         </div>
-        <a class="btn" href="support.php?inquiry_code=<?= urlencode($p['code']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
+        <a class="btn" href="support.php?inquire_pkg=<?= urlencode($p['name']) ?>" style="display:flex; align-items:center; justify-content:center; gap:6px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight:bold; text-decoration:none; padding:8px; font-size:12px; border-radius:8px; text-transform:uppercase;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
           Ask about this
         </a>
@@ -478,10 +575,10 @@ foreach ($prods as $p):
             </tr>
           <?php endforeach; ?>
           <tr><th>Order now</th><?php foreach ($byCat[$c] as $p): ?><td>
-            <?php if ((int)($p['inventory'] ?? 0) <= 0): ?>
+            <?php if (($p['category'] ?? '') !== 'Data' && (int)$pInventory <= 0): ?>
               <a class="btn small" style="background:#555 !important; color:#aaa !important; border:1px solid #444 !important; cursor:not-allowed; pointer-events:none; opacity:0.6; text-decoration:none; display:inline-block; padding:4px 8px; font-size:11px; font-weight:bold;">Out of stock</a>
             <?php else: ?>
-              <a class="btn small" href="checkout.php?code=<?= urlencode($p['code']) ?>">Order</a>
+              <a class="btn small" href="checkout.php?code=<?= urlencode($pCode) ?>">Order</a>
             <?php endif; ?>
           </td><?php endforeach; ?></tr>
         </tbody>

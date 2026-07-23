@@ -152,9 +152,10 @@ class CheckoutController extends BaseController {
         if ($redeemedPoints > $this->me['points']) {
             $redeemedPoints = $this->me['points'];
         }
-        $pointsAfterRedeem = $this->me['points'] - $redeemedPoints;
-        $pointsEarned = (int)round($total * 0.01);
-        $finalPoints = $pointsAfterRedeem + $pointsEarned;
+        $pointsAfterRedeem = max(0, $this->me['points'] - $redeemedPoints);
+        $pointsEarned = max(1, (int)floor($total * 0.01));
+        // Earned points are accrued ONLY AFTER 15-minute grace window expires on Paid orders (prevents cancellation exploitation)
+        $finalPoints = $pointsAfterRedeem;
 
         $items = [];
         $hasHardware = false;

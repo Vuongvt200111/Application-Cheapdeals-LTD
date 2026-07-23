@@ -5,6 +5,20 @@ require_once __DIR__ . '/models/Product.php';
 
 $code = trim($_GET['code'] ?? '');
 $p = Package::getByCode($code) ?: Product::getByCode($code);
+if (!$p && strpos($code, 'data-') === 0) {
+  // Support Data Packages fallback
+  $dataFallback = [
+    'data-hourly-3gb' => ['name'=>'Data Plan - 3GB', 'price'=>2.50, 'unit'=>'Hourly', 'category'=>'Data', 'features'=>1, 'rating_score'=>0, 'rating_count'=>0],
+    'data-1day-1.2gb' => ['name'=>'Data Plan - 1.2GB', 'price'=>1.00, 'unit'=>'1-Day', 'category'=>'Data', 'features'=>1, 'rating_score'=>0, 'rating_count'=>0],
+    'data-1day-7gb' => ['name'=>'5G Data - 7GB', 'price'=>2.00, 'unit'=>'1-Day', 'category'=>'Data', 'features'=>1, 'rating_score'=>0, 'rating_count'=>0],
+    'data-3day-25gb' => ['name'=>'5G Data - 25GB', 'price'=>4.00, 'unit'=>'3-Day', 'category'=>'Data', 'features'=>1, 'rating_score'=>0, 'rating_count'=>0],
+    'data-7day-65gb' => ['name'=>'5G Data - 65GB', 'price'=>9.00, 'unit'=>'7-Day', 'category'=>'Data', 'features'=>1, 'rating_score'=>0, 'rating_count'=>0],
+    'data-30day-66gb' => ['name'=>'30-Day Deal - 66GB', 'price'=>15.00, 'unit'=>'30-Day', 'category'=>'Data', 'features'=>1, 'rating_score'=>0, 'rating_count'=>0]
+  ];
+  if (isset($dataFallback[$code])) {
+    $p = $dataFallback[$code];
+  }
+}
 
 if (!$p) {
     redirect('index.php');

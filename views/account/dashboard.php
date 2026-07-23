@@ -155,7 +155,8 @@ if (!empty($orders)) {
       </div>
       
       <div class="two-col">
-        <div class="fg"><label>New Password</label><input name="new_password" type="password" required></div>
+        <div class="fg"><label>New Password</label><input name="new_password" id="sec-new-password" type="password" required>
+<div id="sec-pwd-meter" style="margin-top:6px;display:none;"><div style="height:6px;background:#333;border-radius:3px;overflow:hidden;margin-bottom:4px;"><div id="sec-pwd-bar" style="height:100%;width:0%;background:#e74c3c;transition:all 0.3s;"></div></div><div style="font-size:0.8rem;display:flex;gap:10px;color:var(--text-muted);"><span id="sec-chk-len">✕ Min 6 chars</span><span id="sec-chk-upper">✕ Uppercase</span><span id="sec-chk-num">✕ Number</span><span id="sec-chk-spec">✕ Special char</span></div></div></div>
         <div class="fg"><label>Confirm New Password</label><input name="confirm_password" type="password" required></div>
       </div>
       
@@ -329,7 +330,16 @@ if (!empty($orders)) {
                     $code_val = '';
                 }
               ?>
-              <a class="btn small" href="account.php?tab=reviews&prefill_code=<?= urlencode($code_val) ?>" style="padding:4px 10px; font-size:11px;">Evaluate</a>
+              <div style="display:flex; flex-direction:column; gap:8px; align-items:center;">
+                <a class="btn small" href="account.php?tab=reviews&prefill_code=<?= urlencode($code_val) ?>" style="padding:4px 10px; font-size:11px; width:100%; text-align:center;">Evaluate</a>
+                <?php
+                  $orderCreated = strtotime($o['created_at']);
+                  $minsPassed = (time() - $orderCreated) / 60;
+                  if ($minsPassed <= 15 && ($o['status'] ?? '') !== 'Cancelled'):
+                ?>
+                  <a class="btn small btn-cancel-order" href="cancel.php?id=<?= $o['id'] ?>" data-created="<?= $o['created_at'] ?>" style="background:#ff3547; color:#fff; padding:4px 10px; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; width:100%; box-sizing:border-box;">Cancel <span class="cancel-timer-badge" data-created="<?= $o['created_at'] ?>" style="font-size:10px; color:#fff; margin-left:4px;"></span></a>
+                <?php endif; ?>
+              </div>
             </td>
           </tr>
         <?php endforeach; ?></tbody>
@@ -436,5 +446,64 @@ document.addEventListener('DOMContentLoaded', function(){
     updateTimer();
     setInterval(updateTimer, 1000);
   });
+});
+</script>
+
+<script>
+function updateCancelTimers() {
+  document.querySelectorAll('.btn-cancel-order').forEach(function(btn){
+    const createdStr = btn.dataset.created;
+    if (!createdStr) return;
+    const createdTime = new Date(createdStr.replace(/-/g, '/')).getTime();
+    const deadline = createdTime + (15 * 60 * 1000);
+    const badge = btn.querySelector('.cancel-timer-badge');
+    const now = new Date().getTime();
+    const diff = deadline - now;
+
+    if (diff <= 0) {
+      btn.style.display = 'none';
+    } else {
+      const m = Math.floor(diff / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      if (badge) badge.innerText = '(' + m + ':' + (s < 10 ? '0' : '') + s + ')';
+    }
+  });
+}
+document.addEventListener('DOMContentLoaded', function(){
+  updateCancelTimers();
+  setInterval(updateCancelTimers, 1000);
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const secInput = document.getElementById('sec-new-password');
+  const secMeter = document.getElementById('sec-pwd-meter');
+  const secBar = document.getElementById('sec-pwd-bar');
+  const secLen = document.getElementById('sec-chk-len');
+  const secUpper = document.getElementById('sec-chk-upper');
+  const secNum = document.getElementById('sec-chk-num');
+  const secSpec = document.getElementById('sec-chk-spec');
+
+  if(secInput && secMeter){
+    secInput.addEventListener('input', function(){
+      const val = secInput.value;
+      if(!val){ secMeter.style.display = 'none'; return; }
+      secMeter.style.display = 'block';
+      const hasLen = val.length >= 6;
+      const hasUpper = /[A-Z]/.test(val);
+      const hasNum = /[0-9]/.test(val);
+      const hasSpec = /[\W_]/.test(val);
+
+      secLen.innerHTML = (hasLen ? '✓' : '✕') + ' Min 6 chars'; secLen.style.color = hasLen ? '#2ecc71' : '#e74c3c';
+      secUpper.innerHTML = (hasUpper ? '✓' : '✕') + ' Uppercase'; secUpper.style.color = hasUpper ? '#2ecc71' : '#e74c3c';
+      secNum.innerHTML = (hasNum ? '✓' : '✕') + ' Number'; secNum.style.color = hasNum ? '#2ecc71' : '#e74c3c';
+      secSpec.innerHTML = (hasSpec ? '✓' : '✕') + ' Special char'; secSpec.style.color = hasSpec ? '#2ecc71' : '#e74c3c';
+
+      let score = (hasLen?1:0) + (hasUpper?1:0) + (hasNum?1:0) + (hasSpec?1:0);
+      secBar.style.width = (score / 4 * 100) + '%';
+      secBar.style.background = score <= 1 ? '#e74c3c' : score <= 3 ? '#f39c12' : '#2ecc71';
+    });
+  }
 });
 </script>

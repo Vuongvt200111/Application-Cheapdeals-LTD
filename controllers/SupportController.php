@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/Ticket.php';
 
 class SupportController extends BaseController {
     public function chat() {
+        $inquiryPackage = trim($_GET['inquire_pkg'] ?? $_GET['inquiry_code'] ?? $_GET['inquiry_pkg'] ?? '');
         if (!$this->me) {
             redirect('login.php');
         }

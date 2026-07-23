@@ -310,6 +310,67 @@ if (!function_exists('paymentPinRecentlyVerified')) {
     }
 }
 
+
+if (!function_exists('accrueEligiblePoints')) {
+    function accrueEligiblePoints($pdo, $userId) {
+        if (!$userId) return;
+        try {
+            $s = $pdo->prepare("
+                SELECT id, total 
+                FROM orders 
+                WHERE user_id = ? 
+                  AND status = 'Paid' 
+                  AND (points_credited IS NULL OR points_credited = 0)
+                  AND created_at <= (NOW() - INTERVAL 15 MINUTE)
+            ");
+            $s->execute([$userId]);
+            $uncredited = $s->fetchAll();
+
+            if (!empty($uncredited)) {
+                $totalPointsToEarn = 0;
+                foreach ($uncredited as $o) {
+                    $pts = max(1, (int)floor((float)$o['total'] * 0.01));
+                    $totalPointsToEarn += $pts;
+                    $pdo->prepare("UPDATE orders SET points_credited = 1 WHERE id = ?")->execute([$o['id']]);
+                }
+                if ($totalPointsToEarn > 0) {
+                    $pdo->prepare("UPDATE users SET points = points + ? WHERE id = ?")->execute([$totalPointsToEarn, $userId]);
+                }
+            }
+        } catch (Throwable $t) {}
+    }
+}
+
+
+// Native Database Seeding for 6 Data Packages (Issues 1, 2, 4, 5)
+$dataSeeds = [
+    ['data-hourly-3gb', 'Data Plan - 3GB', 'Data', 'Lite', 2.50, 0, 0.00, 0, 999999, '["3GB High-Speed Data", "Valid for 6 hours", "Instant Activation"]'],
+    ['data-1day-1.2gb', 'Data Plan - 1.2GB', 'Data', 'Lite', 1.00, 0, 0.00, 0, 999999, '["1.2GB High-Speed Data", "Valid for 24 hours", "Auto-Renew Option"]'],
+    ['data-1day-7gb', '5G Data - 7GB', 'Data', 'Standard', 2.00, 0, 0.00, 0, 999999, '["7GB Ultra 5G Data", "Valid for 24 hours", "Unrestricted Tethering"]'],
+    ['data-3day-25gb', '5G Data - 25GB', 'Data', 'Standard', 4.00, 0, 0.00, 0, 999999, '["25GB Ultra 5G Data", "Valid for 3 days", "Priority Bandwidth"]'],
+    ['data-7day-65gb', '5G Data - 65GB', 'Data', 'Premium', 9.00, 0, 0.00, 0, 999999, '["65GB 5G Super Data", "Valid for 7 days", "Free Wi-Fi Hotspots"]'],
+    ['data-30day-66gb', '30-Day Deal - 66GB', 'Data', 'Premium', 15.00, 0, 0.00, 0, 999999, '["66GB Data (2.2GB/day)", "Valid for 30 days", "Cashback reward: £1.50"]']
+];
+
+$stmt_seed_data = $pdo->prepare("
+    INSERT INTO packages (code, name, category, tier, price, sales_count, rating_score, rating_count, inventory, features)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE 
+      name = VALUES(name),
+      category = VALUES(category),
+      tier = VALUES(tier),
+      price = VALUES(price),
+      features = VALUES(features)
+");
+
+foreach ($dataSeeds as $ds) {
+    try {
+        $stmt_seed_data->execute($ds);
+    } catch (Throwable $t) {}
+}
+
 $ME = currentUser($pdo);
+if ($ME) {
+    accrueEligiblePoints($pdo, $ME['id']);
+}
 $view = currentView();
-?>
