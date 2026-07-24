@@ -204,15 +204,14 @@ require __DIR__ . '/../layout/header.php';
   </table></div>
 
 <?php else: ?>
-        <!-- BỔ SUNG CHO FR28: SLA Technical Escalation Dashboard Component (BUG-021) -->
+        <!-- Supplement to FR28: SLA Technical Escalation Dashboard Component (BUG-021) -->
         <div style="padding:12px; background:rgba(255, 193, 7, 0.1); border:1px solid #ffc107; border-radius:8px; margin-bottom:15px;">
             <form method="post" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0;">
                 <input type="hidden" name="act" value="escalateTicket">
                 <input type="hidden" name="user_id" value="<?= $uid ?>">
                 <span style="font-weight:bold; font-size:13px; color:#b58100;">⚡ SLA Action Panel:</span>
                 <select name="escalate_tier" style="padding:4px; border-radius:6px; background:var(--card); color:var(--ink); border:1px solid var(--line);">
-                    <option value="Tier-2 Technical Support Desk">Escalate to Tier-2 Technical</option>
-                    <option value="Tier-3 Network Engineering">Escalate to Tier-3 Infrastructure</option>
+                    <option value="Technical Support Desk">Escalate to Technical</option>
                     <option value="Billing Ops Senior Manager">Escalate to High Priority Billing</option>
                 </select>
                 <div style="display:flex; align-items:center; gap:5px;">
@@ -263,7 +262,7 @@ require __DIR__ . '/../layout/header.php';
   </div>
 
 <?php elseif ($tab === 'vouchers'): ?>
-  <!-- BỔ SUNG CHO FR30: Cải tiến giao diện chọn tệp phân khúc khách hàng mục tiêu (Generate a voucher removed per user request) -->
+  <!-- Supplement to FR30: Improve target audience segmentation interface (Generate a voucher removed per user request) -->
   <div class="panel" style="max-width:560px; margin-top: 0;">
     <h3 class="sec-h" style="margin-top:0">🎟️ Potential member benefits</h3>
     <p class="lead" style="margin-top:0">Filter users by consumption logs and dispatch a targeted voucher campaign code instantly.</p>
@@ -271,9 +270,9 @@ require __DIR__ . '/../layout/header.php';
       <input type="hidden" name="act" value="issueCohortVoucher">
       <input type="hidden" name="back" value="vouchers">
       <div class="two-col">
-        <div class="fg" style="margin:0;"><label>Target Cohort Rule</label>
-        <select name="cohort_rule" style="padding:8px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink);">
-          <option value="data_usage_gt_20gb">High Data Users (>20GB / mo)</option>
+        <div class="fg" style="margin:0;"><label>Target Rule</label>
+        <select name="rule" style="padding:8px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink);">
+          <option value="data_usage_gt_20gb">High Data Users (>20GB / month)</option>
           <option value="loyal_customers_gt_1year">Loyal Account Holders (>1 Year)</option>
           <option value="multi_device_purchasers">Multi-Device Purchasers</option>
           <option value="inactive_users_gt_30days">Inactive Customers (>30 Days)</option>
@@ -283,7 +282,7 @@ require __DIR__ . '/../layout/header.php';
         <input name="discount" type="number" min="1" max="50" value="15" style="padding:8px; border:1px solid var(--line); border-radius:7px; background:var(--card); color:var(--ink);">
         </div>
       </div>
-      <button class="btn" type="submit">Launch Cohort Campaign</button>
+      <button class="btn" type="submit">Launch Campaign</button>
     </form>
   </div>
 
@@ -358,18 +357,18 @@ require __DIR__ . '/../layout/header.php';
   </table></div>
 
 <?php elseif ($tab === 'orders'): ?>
-  <!-- GIAO DIỆN THANH CÔNG CỤ BỘ LỌC TÌM KIẾM CHO ORDERS (BUG-Nam/Orders) -->
+  <!-- SEARCH FILTER TOOLBAR INTERFACE FOR ORDERS (BUG-Nam/Orders) -->
   <div class="panel" style="margin-bottom: 18px; padding: 14px;">
     <form method="get" action="staff.php" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin: 0;">
       <input type="hidden" name="tab" value="orders">
 
-      <!-- Bộ lọc Tìm kiếm Tên Khách Hàng -->
+      <!-- SEARCH FILTER FOR CUSTOMER NAME -->
       <div class="fg" style="margin: 0; flex: 1; min-width: 200px;">
         <label style="font-weight: bold; font-size: 13px; color: var(--ink);">🔍 Filter Customer Name:</label>
         <input name="f_customer" value="<?= esc($filterCustomer) ?>" placeholder="e.g. N,Nam..." style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--card); color: var(--ink);">
       </div>
 
-      <!-- Bộ lọc Sắp xếp Tổng tiền Total -->
+      <!-- SEARCH FILTER FOR TOTAL PRICE -->
       <div class="fg" style="margin: 0; min-width: 200px;">
         <label style="font-weight: bold; font-size: 13px; color: var(--ink);">💰 Sort by Total Price:</label>
         <select name="s_total" style="width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 7px; background: var(--card); color: var(--ink);">
@@ -379,7 +378,7 @@ require __DIR__ . '/../layout/header.php';
         </select>
       </div>
 
-      <!-- Các nút bấm điều khiển hành động form -->
+      <!-- Action Buttons for Form -->
       <div style="display: flex; gap: 8px;">
         <button class="btn" type="submit" style="padding: 8px 16px; height: 38px;">Apply Filters</button>
         <?php if ($filterCustomer !== '' || $sortTotal !== ''): ?>

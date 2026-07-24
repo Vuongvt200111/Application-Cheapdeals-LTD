@@ -18,6 +18,7 @@ function sendResetEmail($email, $code) {
 
 // Handle AJAX code sending
 if (isset($_GET['action']) && $_GET['action'] === 'send_code') {
+    if (ob_get_length()) ob_clean();
     header('Content-Type: application/json');
     $email = trim($_POST['email'] ?? '');
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -171,8 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: formData
       })
-      .then(res => res.json())
-      .then(data => {
+      .then(res => res.text())
+      .then(text => {
+        let data;
+        try { data = JSON.parse(text); } catch(e) { data = { error: 'Server returned invalid response.' }; }
         if (data.error) {
           toast(data.error);
           sendBtn.disabled = false;
