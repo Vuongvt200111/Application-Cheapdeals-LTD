@@ -7,8 +7,11 @@ function sendVerificationEmail($email, $code) {
     global $pdo;
     saveEmailVerificationCode($pdo, $email, $code);
     $subject = "CheapDeals Account Verification Code";
-    $message = "Your 6-digit verification code is: $code";
-    $headers = "From: no-reply@cheapdeals.com";
+    $message = "Your 6-digit verification code is: $code\n\nThis code will expire in 15 minutes.";
+    $headers = "From: CheapDeals <no-reply@cheapdeals.com>\r\n" .
+               "Reply-To: no-reply@cheapdeals.com\r\n" .
+               "X-Mailer: PHP/" . phpversion() . "\r\n" .
+               "Content-Type: text/plain; charset=UTF-8\r\n";
     $logPath = __DIR__ . '/email_codes.log';
     @file_put_contents($logPath, "[" . date('Y-m-d H:i:s') . "] [$email] Code: $code\n", FILE_APPEND);
     try {
@@ -20,7 +23,7 @@ function sendVerificationEmail($email, $code) {
 if (isset($_GET['action']) && $_GET['action'] === 'send_code') {
     if (ob_get_length()) ob_clean();
     header('Content-Type: application/json');
-    $email = trim($_POST['email'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo json_encode(['error' => 'Please enter a valid email address.']);
         exit;

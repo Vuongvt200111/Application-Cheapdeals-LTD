@@ -85,7 +85,7 @@ class AccountController extends BaseController {
                 $confirm = trim($_POST['confirm_password'] ?? '');
                 $code = trim($_POST['code'] ?? '');
                 
-                $s_code = $this->pdo->prepare('SELECT code FROM email_verifications WHERE email=?');
+                $s_code = $this->pdo->prepare('SELECT code FROM email_verifications WHERE LOWER(email)=LOWER(?)');
                 $s_code->execute([$this->me['email']]);
                 $saved_code = $s_code->fetchColumn();
                 

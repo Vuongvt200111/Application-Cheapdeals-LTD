@@ -7,8 +7,11 @@ function sendResetEmail($email, $code) {
     global $pdo;
     saveEmailVerificationCode($pdo, $email, $code);
     $subject = "CheapDeals Password Reset Verification Code";
-    $message = "Your 6-digit password reset verification code is: $code";
-    $headers = "From: no-reply@cheapdeals.com";
+    $message = "Your 6-digit password reset verification code is: $code\n\nThis code will expire in 15 minutes.";
+    $headers = "From: CheapDeals <no-reply@cheapdeals.com>\r\n" .
+               "Reply-To: no-reply@cheapdeals.com\r\n" .
+               "X-Mailer: PHP/" . phpversion() . "\r\n" .
+               "Content-Type: text/plain; charset=UTF-8\r\n";
     $logPath = __DIR__ . '/email_codes.log';
     @file_put_contents($logPath, "[" . date('Y-m-d H:i:s') . "] [$email] Reset Code: $code\n", FILE_APPEND);
     try {
@@ -20,13 +23,13 @@ function sendResetEmail($email, $code) {
 if (isset($_GET['action']) && $_GET['action'] === 'send_code') {
     if (ob_get_length()) ob_clean();
     header('Content-Type: application/json');
-    $email = trim($_POST['email'] ?? '');
+    $email = strtolower(trim($_POST['email'] ?? ''));
     if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         echo json_encode(['error' => 'Please enter a valid email address.']);
         exit;
     }
     // Check if email actually exists
-    $s = $pdo->prepare('SELECT id FROM users WHERE email=?');
+    $s = $pdo->prepare('SELECT id FROM users WHERE LOWER(email)=LOWER(?)');
     $s->execute([$email]);
     if (!$s->fetch()) {
         echo json_encode(['error' => 'No account found with this email address.']);
@@ -47,10 +50,10 @@ $email_validated = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['step_1'])) {
-        $email = trim($_POST['email'] ?? '');
+        $email = strtolower(trim($_POST['email'] ?? ''));
         $code = trim($_POST['code'] ?? '');
         
-        $s_check = $pdo->prepare('SELECT code FROM email_verifications WHERE email=?');
+        $s_check = $pdo->prepare('SELECT code FROM email_verifications WHERE LOWER(email)=LOWER(?)');
         $s_check->execute([$email]);
         $saved_code = $s_check->fetchColumn();
         
@@ -79,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Update password
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $pdo->prepare('UPDATE users SET password=? WHERE email=?')->execute([$hash, $email]);
+            $pdo->prepare('UPDATE users SET password=? WHERE LOWER(email)=LOWER(?)')->execute([$hash, $email]);
             
             $ok = 'Password reset successfully! You can now log in.';
             $step = 3;
