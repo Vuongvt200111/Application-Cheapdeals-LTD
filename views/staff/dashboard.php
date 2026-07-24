@@ -51,7 +51,7 @@ require __DIR__ . '/../layout/header.php';
       <input type="hidden" name="act" value="addPkg"><input type="hidden" name="back" value="packages">
       <div class="fg"><label>Name</label><input name="name" required></div>
       <div class="two-col">
-        <div class="fg"><label>Category</label><select name="category"><?php foreach (['Mobile','Broadband','Tablet','Bundles'] as $c): ?><option><?= $c ?></option><?php endforeach; ?></select></div>
+        <div class="fg"><label>Category</label><select name="category"><?php foreach (['Data','Mobile','Broadband','Tablet','Bundles'] as $c): ?><option><?= $c ?></option><?php endforeach; ?></select></div>
         <div class="fg"><label>Tier</label><select name="tier"><?php foreach (['Lite','Standard','Premium','Deal'] as $t): ?><option><?= $t ?></option><?php endforeach; ?></select></div>
       </div>
       <div class="two-col">
