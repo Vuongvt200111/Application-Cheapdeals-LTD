@@ -317,7 +317,7 @@ if (!function_exists('accrueEligiblePoints')) {
                 WHERE user_id = ? 
                   AND status = 'Paid' 
                   AND (points_credited IS NULL OR points_credited = 0)
-                  AND created_at <= (NOW() - INTERVAL 15 MINUTE)
+                  AND created_at <= (NOW() - INTERVAL 5 MINUTE)
             ");
             $s->execute([$userId]);
             $uncredited = $s->fetchAll();

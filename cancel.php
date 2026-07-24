@@ -24,8 +24,8 @@ if (($order['status'] ?? '') === 'Cancelled') {
 $orderCreated = strtotime($order['created_at']);
 $minsPassed = (time() - $orderCreated) / 60;
 
-if ($minsPassed > 15) {
-    redirect('account.php?tab=billing&msg=' . urlencode('The 15-minute cancellation window for this order has expired.'));
+if ($minsPassed > 5) {
+    redirect('account.php?tab=billing&msg=' . urlencode('The 5-minute cancellation window for this order has expired.'));
 }
 
 /* Update status to Cancelled, set refunded flag, and log audit trail */
@@ -34,7 +34,7 @@ $pdo->prepare("UPDATE orders SET status='Cancelled', refunded=1, points_credited
 $refundRef = 'RF-' . strtoupper(substr(md5($orderId . microtime()), 0, 8));
 
 if (function_exists('audit')) {
-    audit($pdo, $ME['email'], 'order_cancelled', 'Order #' . $orderId . ' (' . ($order['package_name'] ?? 'Package') . ', ' . gbp($order['total'] ?? 0) . ') cancelled within 15m grace window.');
+    audit($pdo, $ME['email'], 'order_cancelled', 'Order #' . $orderId . ' (' . ($order['package_name'] ?? 'Package') . ', ' . gbp($order['total'] ?? 0) . ') cancelled within 5m grace window.');
     audit($pdo, $ME['email'], 'refund_webhook', 'Refund webhook fired for order #' . $orderId . ' — ref ' . $refundRef . ', amount ' . gbp($order['total'] ?? 0) . '.');
 }
 

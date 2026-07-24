@@ -158,7 +158,7 @@ class CheckoutController extends BaseController {
         }
         $pointsAfterRedeem = max(0, $this->me['points'] - $redeemedPoints);
         $pointsEarned = max(1, (int)floor($total * 0.01));
-        // Earned points are accrued ONLY AFTER 15-minute grace window expires on Paid orders (prevents cancellation exploitation)
+        // Earned points are accrued ONLY AFTER 5-minute (4m 59s) grace window expires on Paid orders (prevents cancellation exploitation)
         $finalPoints = $pointsAfterRedeem;
 
         $items = [];
@@ -264,7 +264,7 @@ class CheckoutController extends BaseController {
         User::updatePoints($this->me['id'], $finalPoints);
 
         // Add order with cancellation deadline and has_hardware flag
-        $cancelDeadline = (new DateTimeImmutable())->modify('+' . CANCEL_GRACE_MINUTES . ' minutes')->format('Y-m-d H:i:s');
+        $cancelDeadline = (new DateTimeImmutable())->modify('+299 seconds')->format('Y-m-d H:i:s');
         
         $stmt = $this->pdo->prepare('INSERT INTO orders(user_id, package_name, total, saved, status, cancel_deadline, has_hardware) VALUES (?,?,?,?,?,?,?)');
         $stmt->execute([$this->me['id'], $name, $total, $saved, 'Paid', $cancelDeadline, $hasHardware ? 1 : 0]);

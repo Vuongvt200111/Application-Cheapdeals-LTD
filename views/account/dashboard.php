@@ -339,7 +339,7 @@ if (!empty($orders)) {
                 <?php
                   $orderCreated = strtotime($o['created_at']);
                   $minsPassed = (time() - $orderCreated) / 60;
-                  if ($minsPassed <= 15 && ($o['status'] ?? '') !== 'Cancelled'):
+                  if ($minsPassed <= 5 && ($o['status'] ?? '') !== 'Cancelled'):
                 ?>
                   <a class="btn small btn-cancel-order" href="cancel.php?id=<?= $o['id'] ?>" data-created="<?= $o['created_at'] ?>" style="background:#ff3547; color:#fff; padding:4px 10px; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; width:100%; box-sizing:border-box;">Cancel <span class="cancel-timer-badge" data-created="<?= $o['created_at'] ?>" style="font-size:10px; color:#fff; margin-left:4px;"></span></a>
                 <?php endif; ?>
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function(){
     const createdStr = btn.dataset.created;
     if (!createdStr) return;
     const createdTime = new Date(createdStr).getTime();
-    const deadline = createdTime + (15 * 60 * 1000);
+    const deadline = createdTime + (299 * 1000);
     const badge = btn.nextElementSibling;
 
     function updateTimer() {
@@ -459,7 +459,7 @@ function updateCancelTimers() {
     const createdStr = btn.dataset.created;
     if (!createdStr) return;
     const createdTime = new Date(createdStr.replace(/-/g, '/')).getTime();
-    const deadline = createdTime + (15 * 60 * 1000);
+    const deadline = createdTime + (299 * 1000);
     const badge = btn.querySelector('.cancel-timer-badge');
     const now = new Date().getTime();
     const diff = deadline - now;

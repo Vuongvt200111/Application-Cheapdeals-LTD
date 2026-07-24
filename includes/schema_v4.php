@@ -51,7 +51,7 @@ ensureColumn($pdo, 'orders', 'has_hardware',    'has_hardware TINYINT(1) NOT NUL
 // ensureColumn($pdo, 'packages', 'stock', 'inventory INT NULL');
 
 /* Grace window length for FR34, in minutes — single source of truth */
-if (!defined('CANCEL_GRACE_MINUTES')) define('CANCEL_GRACE_MINUTES', 15);
+if (!defined('CANCEL_GRACE_MINUTES')) define('CANCEL_GRACE_MINUTES', 5);
 
 /* ---------------------------------------------------------------------
  * FR17 — server-side pricing authority.
