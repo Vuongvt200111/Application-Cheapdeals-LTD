@@ -31,6 +31,8 @@ function sendVerificationEmail($email, $code) {
 
 // Handle AJAX code sending
 if (isset($_GET['action']) && $_GET['action'] === 'send_code') {
+    ini_set('display_errors', '0');
+    error_reporting(0);
     if (ob_get_length()) ob_clean();
     header('Content-Type: application/json');
     $email = strtolower(trim($_POST['email'] ?? ''));
