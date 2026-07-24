@@ -103,7 +103,7 @@ class AccountController extends BaseController {
                 
                 $hash = password_hash($new, PASSWORD_DEFAULT);
                 $this->pdo->prepare('UPDATE users SET password=? WHERE id=?')->execute([$hash, $this->me['id']]);
-                $this->pdo->prepare('DELETE FROM email_verifications WHERE email=?')->execute([$this->me['email']]);
+                // Retain audit trail in email_verifications permanently for security audits
                 
                 redirect('account.php?tab=security&msg=' . urlencode('Password changed successfully.'));
             }

@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email_validated = $email;
         } else {
             // Delete verification code
-            $pdo->prepare('DELETE FROM email_verifications WHERE email=?')->execute([$email]);
+            // Retain audit trail in email_verifications permanently for security audits
             
             // Update password
             $hash = password_hash($password, PASSWORD_DEFAULT);

@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $err = 'An account with this email already exists.';
         } else {
           // Delete code after use
-          $pdo->prepare('DELETE FROM email_verifications WHERE email=?')->execute([$f['email']]);
+          // Retain audit trail in email_verifications permanently for security audits
           
           $pdo->prepare('INSERT INTO users(name,email,password,role,address,phone) VALUES (?,?,?,?,?,?)')
               ->execute([$f['name'], $f['email'], password_hash($f['password'], PASSWORD_DEFAULT), 'user', $f['address'], $f['phone']]);
