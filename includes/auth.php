@@ -309,110 +309,47 @@ if (!function_exists('paymentPinRecentlyVerified')) {
 
 if (!function_exists('accrueEligiblePoints')) {
     function accrueEligiblePoints($pdo, $userId) {
-        if (!$userId) return;
+        if (!$userId) return 0;
+        $totalEarned = 0;
         try {
             $s = $pdo->prepare("
-                SELECT id, total 
+                SELECT id, total, created_at 
                 FROM orders 
                 WHERE user_id = ? 
                   AND status = 'Paid' 
                   AND (points_credited IS NULL OR points_credited = 0)
-                  AND created_at <= (NOW() - INTERVAL 5 MINUTE)
             ");
             $s->execute([$userId]);
             $uncredited = $s->fetchAll();
 
             if (!empty($uncredited)) {
-                $totalPointsToEarn = 0;
+                $now = time();
                 foreach ($uncredited as $o) {
-                    $pts = max(1, (int)floor((float)$o['total'] * 0.01));
-                    $totalPointsToEarn += $pts;
-                    $pdo->prepare("UPDATE orders SET points_credited = 1 WHERE id = ?")->execute([$o['id']]);
+                    $created = strtotime($o['created_at']);
+                    // Check if 4 minutes 59 seconds (299 seconds) have elapsed since order creation
+                    if (($now - $created) >= 299) {
+                        $pts = max(1, (int)floor((float)$o['total'] * 0.01));
+                        $totalEarned += $pts;
+                        $pdo->prepare("UPDATE orders SET points_credited = 1 WHERE id = ?")->execute([$o['id']]);
+                    }
                 }
-                if ($totalPointsToEarn > 0) {
-                    $pdo->prepare("UPDATE users SET points = points + ? WHERE id = ?")->execute([$totalPointsToEarn, $userId]);
+                if ($totalEarned > 0) {
+                    $pdo->prepare("UPDATE users SET points = points + ? WHERE id = ?")->execute([$totalEarned, $userId]);
                 }
             }
         } catch (Throwable $t) {}
-    }
-}
-
-
-// Native Database Seeding for 6 Data Packages (Issues 1, 2, 4, 5)
-$dataSeeds = [
-    ['data-hourly-3gb', 'Data Plan - 3GB', 'Data', 'Lite', 2.50, 0, 0.00, 0, 999999, '["3GB High-Speed Data", "Valid for 6 hours", "Instant Activation"]'],
-    ['data-1day-1.2gb', 'Data Plan - 1.2GB', 'Data', 'Lite', 1.00, 0, 0.00, 0, 999999, '["1.2GB High-Speed Data", "Valid for 24 hours", "Auto-Renew Option"]'],
-    ['data-1day-7gb', '5G Data - 7GB', 'Data', 'Standard', 2.00, 0, 0.00, 0, 999999, '["7GB Ultra 5G Data", "Valid for 24 hours", "Unrestricted Tethering"]'],
-    ['data-3day-25gb', '5G Data - 25GB', 'Data', 'Standard', 4.00, 0, 0.00, 0, 999999, '["25GB Ultra 5G Data", "Valid for 3 days", "Priority Bandwidth"]'],
-    ['data-7day-65gb', '5G Data - 65GB', 'Data', 'Premium', 9.00, 0, 0.00, 0, 999999, '["65GB 5G Super Data", "Valid for 7 days", "Free Wi-Fi Hotspots"]'],
-    ['data-30day-66gb', 'Deal - 66GB', 'Data', 'Premium', 15.00, 0, 0.00, 0, 999999, '["66GB Data (2.2GB/day)", "Valid for 30 days", "Cashback reward: £1.50"]']
-];
-
-$stmt_seed_data = $pdo->prepare("
-    INSERT INTO packages (code, name, category, tier, price, sales_count, rating_score, rating_count, inventory, features)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON DUPLICATE KEY UPDATE 
-      name = VALUES(name),
-      category = VALUES(category),
-      tier = VALUES(tier),
-      price = VALUES(price),
-      features = VALUES(features)
-");
-
-foreach ($dataSeeds as $ds) {
-    try {
-        $stmt_seed_data->execute($ds);
-    } catch (Throwable $t) {}
-}
-
-
-if (!function_exists('cd_get_unit_label')) {
-    function cd_get_unit_label($p) {
-        if (!empty($p['unit'])) {
-            return $p['unit'];
-        }
-        $cat = $p['category'] ?? '';
-        if ($cat !== 'Data') {
-            return 'month';
-        }
-        $name = $p['name'] ?? '';
-        $code = $p['code'] ?? '';
-        $str = strtolower($name . ' ' . $code);
-
-        if (preg_match('/hourly|hour|6\s*hour/i', $str)) return 'Hourly';
-        if (preg_match('/30-day|30day|30\s*day/i', $str)) return '30-Day';
-        if (preg_match('/7-day|7day|7\s*day/i', $str)) return '7-Day';
-        if (preg_match('/3-day|3day|3\s*day/i', $str)) return '3-Day';
-        if (preg_match('/1-day|1day|1\s*day/i', $str)) return '1-Day';
-
-        $featRaw = $p['features'] ?? '';
-        $feats = is_array($featRaw) ? $featRaw : (json_decode($featRaw, true) ?: []);
-        foreach ($feats as $f) {
-            $fl = strtolower((string)$f);
-            if (preg_match('/6\s*hours?/i', $fl)) return 'Hourly';
-            if (preg_match('/30\s*days?/i', $fl)) return '30-Day';
-            if (preg_match('/7\s*days?/i', $fl)) return '7-Day';
-            if (preg_match('/3\s*days?/i', $fl)) return '3-Day';
-            if (preg_match('/24\s*hours?|1\s*day/i', $fl)) return '1-Day';
-        }
-
-        return '1-Day';
-    }
-}
-
-
-if (!function_exists('saveEmailVerificationCode')) {
-    function saveEmailVerificationCode($pdo, $email, $code) {
-        if (!$pdo || !$email || !$code) return;
-        try {
-            $s = $pdo->prepare("INSERT INTO email_verifications (email, code, created_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE code = VALUES(code), created_at = NOW()");
-            $s->execute([$email, $code]);
-        } catch (Throwable $t) {}
+        return $totalEarned;
     }
 }
 
 $ME = currentUser($pdo);
 if ($ME) {
-    accrueEligiblePoints($pdo, $ME['id']);
+    $earnedNow = accrueEligiblePoints($pdo, $ME['id']);
+    if ($earnedNow > 0) {
+        $ME['points'] += $earnedNow;
+        if (isset($_SESSION['ME'])) {
+            $_SESSION['ME']['points'] = $ME['points'];
+        }
+    }
 }
 $view = currentView();
