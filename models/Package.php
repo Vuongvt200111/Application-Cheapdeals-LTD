@@ -34,10 +34,13 @@ class Package {
         return true;
     }
 
-    public static function add($code, $name, $category, $tier, $price, $features, $inventory) {
+    public static function add($code, $name, $category, $tier, $price, $features, $inventory, $unit = 'month') {
         $pdo = Database::getPDO();
-        $s = $pdo->prepare("INSERT INTO packages (code, name, category, tier, price, features, inventory) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $s->execute([$code, $name, $category, $tier, $price, $features, $inventory]);
+        try {
+            $pdo->exec("ALTER TABLE packages ADD COLUMN unit VARCHAR(30) DEFAULT NULL");
+        } catch (Throwable $t) {}
+        $s = $pdo->prepare("INSERT INTO packages (code, name, category, tier, price, features, inventory, unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+        $s->execute([$code, $name, $category, $tier, $price, $features, $inventory, $unit]);
         return true;
     }
 
