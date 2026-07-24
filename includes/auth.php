@@ -369,6 +369,41 @@ foreach ($dataSeeds as $ds) {
     } catch (Throwable $t) {}
 }
 
+
+if (!function_exists('cd_get_unit_label')) {
+    function cd_get_unit_label($p) {
+        if (!empty($p['unit'])) {
+            return $p['unit'];
+        }
+        $cat = $p['category'] ?? '';
+        if ($cat !== 'Data') {
+            return 'month';
+        }
+        $name = $p['name'] ?? '';
+        $code = $p['code'] ?? '';
+        $str = strtolower($name . ' ' . $code);
+
+        if (preg_match('/hourly|hour|6\s*hour/i', $str)) return 'Hourly';
+        if (preg_match('/30-day|30day|30\s*day/i', $str)) return '30-Day';
+        if (preg_match('/7-day|7day|7\s*day/i', $str)) return '7-Day';
+        if (preg_match('/3-day|3day|3\s*day/i', $str)) return '3-Day';
+        if (preg_match('/1-day|1day|1\s*day/i', $str)) return '1-Day';
+
+        $featRaw = $p['features'] ?? '';
+        $feats = is_array($featRaw) ? $featRaw : (json_decode($featRaw, true) ?: []);
+        foreach ($feats as $f) {
+            $fl = strtolower((string)$f);
+            if (preg_match('/6\s*hours?/i', $fl)) return 'Hourly';
+            if (preg_match('/30\s*days?/i', $fl)) return '30-Day';
+            if (preg_match('/7\s*days?/i', $fl)) return '7-Day';
+            if (preg_match('/3\s*days?/i', $fl)) return '3-Day';
+            if (preg_match('/24\s*hours?|1\s*day/i', $fl)) return '1-Day';
+        }
+
+        return '1-Day';
+    }
+}
+
 $ME = currentUser($pdo);
 if ($ME) {
     accrueEligiblePoints($pdo, $ME['id']);

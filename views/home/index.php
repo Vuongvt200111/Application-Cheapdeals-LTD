@@ -292,7 +292,8 @@ require __DIR__ . '/../layout/header.php';
           <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name']) ?>
         </div>
         <h3><?= esc($p['name']) ?></h3>
-        <div class="price"><?= gbp($p['price']) ?><?php if ($is_pkg): ?> <small>/ month</small><?php endif; ?></div>
+        <?php $recUnit = cd_get_unit_label($p); ?>
+        <div class="price"><?= gbp($p['price']) ?><?php if ($is_pkg): ?> <small>/ <?= esc($recUnit) ?></small><?php endif; ?></div>
         
         <div class="card-meta">
           <span class="meta-sales">👤.<?= $pSales ?> purchased</span>
@@ -387,7 +388,7 @@ foreach ($pkgs as $p):
       <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name']) ?>
     </div>
     <h3><?= esc($p['name']) ?></h3>
-    <?php $unitLabel = $p['unit'] ?? (($p['category'] ?? '') === 'Data' ? 'Pass' : 'month'); ?>
+    <?php $unitLabel = cd_get_unit_label($p); ?>
     <div class="price"><?= gbp($p['price']) ?> <small>/ <?= esc($unitLabel) ?></small></div>
     
     <div class="card-meta">
