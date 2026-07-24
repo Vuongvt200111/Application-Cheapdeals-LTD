@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';   // -> $pdo, $CFG
@@ -312,12 +313,15 @@ if (!function_exists('accrueEligiblePoints')) {
         if (!$userId) return 0;
         $totalEarned = 0;
         try {
+            if (!function_exists('tableColumnExists') || !tableColumnExists($pdo, 'orders', 'points_credited')) {
+                try { $pdo->exec("ALTER TABLE orders ADD COLUMN points_credited INT NOT NULL DEFAULT 0"); } catch(Throwable $t) {}
+            }
             $s = $pdo->prepare("
                 SELECT id, total, created_at 
                 FROM orders 
                 WHERE user_id = ? 
                   AND status = 'Paid' 
-                  AND (points_credited IS NULL OR points_credited = 0)
+                  AND points_credited = 0
             ");
             $s->execute([$userId]);
             $uncredited = $s->fetchAll();
@@ -326,8 +330,12 @@ if (!function_exists('accrueEligiblePoints')) {
                 $now = time();
                 foreach ($uncredited as $o) {
                     $created = strtotime($o['created_at']);
-                    // Check if 4 minutes 59 seconds (299 seconds) have elapsed since order creation
-                    if (($now - $created) >= 299) {
+                    $elapsed = $now - $created;
+                    if ($elapsed < -3600) {
+                        $created -= 25200; // adjust 7-hour timezone difference between GMT and local GMT+7
+                        $elapsed = $now - $created;
+                    }
+                    if ($elapsed >= 299 || $elapsed < 0) {
                         $pts = max(1, (int)floor((float)$o['total'] * 0.01));
                         $totalEarned += $pts;
                         $pdo->prepare("UPDATE orders SET points_credited = 1 WHERE id = ?")->execute([$o['id']]);
