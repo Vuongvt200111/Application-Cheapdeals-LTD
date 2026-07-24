@@ -46,7 +46,7 @@ class Package {
 
     public static function delete($code) {
         $pdo = Database::getPDO();
-        $s = $pdo->prepare("UPDATE packages SET active=0 WHERE code=?");
+        $s = $pdo->prepare("DELETE FROM packages WHERE code=?");
         $s->execute([$code]);
         return true;
     }

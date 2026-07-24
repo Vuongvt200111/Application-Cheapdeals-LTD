@@ -400,6 +400,17 @@ if (!function_exists('cd_get_unit_label')) {
     }
 }
 
+
+if (!function_exists('saveEmailVerificationCode')) {
+    function saveEmailVerificationCode($pdo, $email, $code) {
+        if (!$pdo || !$email || !$code) return;
+        try {
+            $s = $pdo->prepare("INSERT INTO email_verifications (email, code, created_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE code = VALUES(code), created_at = NOW()");
+            $s->execute([$email, $code]);
+        } catch (Throwable $t) {}
+    }
+}
+
 $ME = currentUser($pdo);
 if ($ME) {
     accrueEligiblePoints($pdo, $ME['id']);

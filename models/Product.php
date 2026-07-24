@@ -48,7 +48,7 @@ class Product {
 
     public static function delete($code) {
         $pdo = Database::getPDO();
-        $s = $pdo->prepare("UPDATE products SET active=0 WHERE code=?");
+        $s = $pdo->prepare("DELETE FROM products WHERE code=?");
         $s->execute([$code]);
         return true;
     }

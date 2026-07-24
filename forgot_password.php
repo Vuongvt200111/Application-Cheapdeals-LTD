@@ -4,6 +4,8 @@ if ($ME) redirect('index.php');
 
 // Helper to send email
 function sendResetEmail($email, $code) {
+    global $pdo;
+    saveEmailVerificationCode($pdo, $email, $code);
     $subject = "CheapDeals Password Reset Verification Code";
     $message = "Your 6-digit password reset verification code is: $code";
     $headers = "From: no-reply@cheapdeals.com";
@@ -30,7 +32,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'send_code') {
         exit;
     }
     $code = sprintf('%06d', mt_rand(100000, 999999));
-    $s_save = $pdo->prepare('INSERT INTO email_verifications (email, code) VALUES (?, ?) ON DUPLICATE KEY UPDATE code = VALUES(code)');
+    $s_save = $pdo->prepare('INSERT INTO email_verifications (email, code, created_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE code = VALUES(code), created_at = NOW()');
     $s_save->execute([$email, $code]);
     sendResetEmail($email, $code);
     echo json_encode(['success' => true, 'message' => 'Code sent! (Check email_codes.log in project root if local SMTP is off)']);
