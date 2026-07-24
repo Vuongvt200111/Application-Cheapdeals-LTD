@@ -55,9 +55,19 @@ require __DIR__ . '/../layout/header.php';
         <div class="fg"><label>Tier</label><select name="tier"><?php foreach (['Lite','Standard','Premium','Deal'] as $t): ?><option><?= $t ?></option><?php endforeach; ?></select></div>
       </div>
       <div class="two-col">
-        <div class="fg"><label>Price (£/month)</label><input name="price" type="number" step="0.01" value="20" required></div>
-        <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" min="0" oninput="if(this.value<0)this.value=0;" value="10" min="0" oninput="if(this.value<0)this.value=0;" required></div>
+        <div class="fg"><label>Price (£)</label><input name="price" type="number" step="0.01" value="20" required></div>
+        <div class="fg"><label>Price Unit (Cycle)</label>
+          <select name="unit">
+            <option value="month">Monthly (£/month)</option>
+            <option value="Hourly">Hourly (£/Hourly)</option>
+            <option value="1-Day">1-Day (£/1-Day)</option>
+            <option value="3-Day">3-Day (£/3-Day)</option>
+            <option value="7-Day">7-Day (£/7-Day)</option>
+            <option value="30-Day">30-Day (£/30-Day)</option>
+          </select>
+        </div>
       </div>
+      <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" value="10" required></div>
       <div class="fg"><label>Features (one per line)</label><textarea name="features" rows="3" placeholder="1 mobile phone&#10;500 free minutes" required></textarea></div>
       <button class="btn" type="submit">Create option</button>
     </form>

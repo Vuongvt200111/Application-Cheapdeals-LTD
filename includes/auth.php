@@ -1,9 +1,5 @@
 <?php
-/* ============================================================
-   Session, helpers, current user, and seed accounts.
-   Every page does:  require __DIR__.'/includes/auth.php';
-   …then has $pdo, $CFG, $ME and the helper functions available.
-   ============================================================ */
+
 if (session_status() === PHP_SESSION_NONE) session_start();
 require_once __DIR__ . '/db.php';   // -> $pdo, $CFG
 
@@ -349,7 +345,7 @@ $dataSeeds = [
     ['data-1day-7gb', '5G Data - 7GB', 'Data', 'Standard', 2.00, 0, 0.00, 0, 999999, '["7GB Ultra 5G Data", "Valid for 24 hours", "Unrestricted Tethering"]'],
     ['data-3day-25gb', '5G Data - 25GB', 'Data', 'Standard', 4.00, 0, 0.00, 0, 999999, '["25GB Ultra 5G Data", "Valid for 3 days", "Priority Bandwidth"]'],
     ['data-7day-65gb', '5G Data - 65GB', 'Data', 'Premium', 9.00, 0, 0.00, 0, 999999, '["65GB 5G Super Data", "Valid for 7 days", "Free Wi-Fi Hotspots"]'],
-    ['data-30day-66gb', '30-Day Deal - 66GB', 'Data', 'Premium', 15.00, 0, 0.00, 0, 999999, '["66GB Data (2.2GB/day)", "Valid for 30 days", "Cashback reward: £1.50"]']
+    ['data-30day-66gb', 'Deal - 66GB', 'Data', 'Premium', 15.00, 0, 0.00, 0, 999999, '["66GB Data (2.2GB/day)", "Valid for 30 days", "Cashback reward: £1.50"]']
 ];
 
 $stmt_seed_data = $pdo->prepare("
