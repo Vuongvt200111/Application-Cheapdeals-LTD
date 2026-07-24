@@ -16,14 +16,15 @@ if ($ME) redirect('index.php');
 function sendResetEmail($email, $code) {
     global $pdo;
     saveEmailVerificationCode($pdo, $email, $code);
-    $subject = "CheapDeals Password Reset Verification Code";
-    $message = "Your 6-digit password reset verification code is: $code\n\nThis code will expire in 15 minutes.";
-    $headers = "From: CheapDeals <no-reply@cheapdeals.com>\r\n" .
+    $subject = "CheapDeals Password Reset Verification Code - $code";
+    $message = "Hello,\n\nYour CheapDeals 6-digit password reset verification code is: $code\n\nPlease enter this code to reset your password. This code will expire in 15 minutes.\n\nThank you,\nCheapDeals Team";
+    $headers = "From: CheapDeals Support <no-reply@cheapdeals.com>\r\n" .
                "Reply-To: no-reply@cheapdeals.com\r\n" .
                "X-Mailer: PHP/" . phpversion() . "\r\n" .
+               "MIME-Version: 1.0\r\n" .
                "Content-Type: text/plain; charset=UTF-8\r\n";
-    $logPath = __DIR__ . '/email_codes.log';
-    @file_put_contents($logPath, "[" . date('Y-m-d H:i:s') . "] [$email] Reset Code: $code\n", FILE_APPEND);
+    $logLine = "[" . date('Y-m-d H:i:s') . "] [$email] Reset Code: $code\n";
+    @file_put_contents(__DIR__ . '/email_codes.log', $logLine, FILE_APPEND | LOCK_EX);
     try {
         @mail($email, $subject, $message, $headers);
     } catch (Throwable $e) {}
