@@ -56,7 +56,7 @@ require __DIR__ . '/../layout/header.php';
       </div>
       <div class="two-col">
         <div class="fg"><label>Price (£)</label><input name="price" type="number" step="0.01" value="20" required></div>
-        <div class="fg"><label>Price Unit (Cycle)</label>
+        <div class="fg"><label>Cycle Times</label>
           <select name="unit">
             <option value="month">Monthly (£/month)</option>
             <option value="Hourly">Hourly (£/Hourly)</option>
