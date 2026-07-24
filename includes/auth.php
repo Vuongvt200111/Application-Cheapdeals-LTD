@@ -1,4 +1,14 @@
 <?php
+if (!function_exists('saveEmailVerificationCode')) {
+    function saveEmailVerificationCode($pdo, $email, $code) {
+        if (!$pdo || !$email || !$code) return;
+        try {
+            $s = $pdo->prepare("INSERT INTO email_verifications (email, code, created_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE code = VALUES(code), created_at = NOW()");
+            $s->execute([$email, $code]);
+        } catch (Throwable $t) {}
+    }
+}
+
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 if (session_status() === PHP_SESSION_NONE) session_start();
