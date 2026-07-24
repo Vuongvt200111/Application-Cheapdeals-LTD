@@ -79,7 +79,7 @@ require __DIR__ . '/../layout/header.php';
   
   <div class="fg">
     <label>Card number (VISACheck checked)</label>
-    <input id="co-num" name="co_num" required maxlength="19" inputmode="numeric" value="<?= esc($ME['card']) ?>" placeholder="4000 1234 5678 9010">
+    <input id="co-num" name="co_num" required maxlength="19" inputmode="numeric" value="<?= esc($ME['card']) ?>" placeholder="4242 4242 4242 4242">
   </div>
   
   <div class="two-col">
