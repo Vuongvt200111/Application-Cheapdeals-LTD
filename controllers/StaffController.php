@@ -124,6 +124,7 @@ class StaffController extends BaseController {
         } elseif ($act === 'addPkg') {
             $feat = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $_POST['features'] ?? ''))));
             $code = 'pkg-' . substr(md5(($_POST['name'] ?? '') . microtime()), 0, 6);
+            $unit = trim($_POST['unit'] ?? $_POST['cycle'] ?? $_POST['price_unit'] ?? 'month');
             Package::add(
                 $code,
                 trim($_POST['name']),
@@ -131,7 +132,8 @@ class StaffController extends BaseController {
                 $_POST['tier'],
                 (float)$_POST['price'],
                 json_encode($feat, JSON_UNESCAPED_UNICODE),
-                (int)$_POST['inventory']
+                (int)$_POST['inventory'],
+                $unit
             );
             audit($this->pdo, $this->me['email'], 'package_added', 'Added package: ' . trim($_POST['name']));
             $flash = 'Option created.';
