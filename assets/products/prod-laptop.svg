@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 430" width="820" height="430" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <radialGradient id="bg_prod-laptop" cx="60%" cy="45%" r="80%">
+      <stop offset="0%" stop-color="#1a1836"/>
+      <stop offset="55%" stop-color="#0c0b1c"/>
+      <stop offset="100%" stop-color="#04050a"/>
+    </radialGradient>
+    <radialGradient id="pglow_prod-laptop" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8f7cf5" stop-opacity="0.5"/>
+      <stop offset="45%" stop-color="#6b4fd8" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#6b4fd8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lidFrame_prod-laptop" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0%" stop-color="#4b4866"/>
+      <stop offset="45%" stop-color="#272438"/>
+      <stop offset="100%" stop-color="#16141f"/>
+    </linearGradient>
+    <linearGradient id="screenFill_prod-laptop" x1="0" y1="0" x2="0.55" y2="1">
+      <stop offset="0%" stop-color="#16132d"/>
+      <stop offset="52%" stop-color="#241d4e"/>
+      <stop offset="100%" stop-color="#463aa2"/>
+    </linearGradient>
+    <linearGradient id="screenSheen_prod-laptop" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.13"/>
+      <stop offset="55%" stop-color="#ffffff" stop-opacity="0.02"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="barFill_prod-laptop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#cfc0ff"/>
+      <stop offset="100%" stop-color="#6b4fd8"/>
+    </linearGradient>
+    <linearGradient id="deckFill_prod-laptop" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#d2d5e1"/>
+      <stop offset="48%" stop-color="#a8adbf"/>
+      <stop offset="100%" stop-color="#858b9f"/>
+    </linearGradient>
+    <linearGradient id="deckLip_prod-laptop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#858b9f"/>
+      <stop offset="100%" stop-color="#4d5262"/>
+    </linearGradient>
+    <linearGradient id="padFill_prod-laptop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c1c5d3"/>
+      <stop offset="100%" stop-color="#9aa0b2"/>
+    </linearGradient>
+    <linearGradient id="hingeFill_prod-laptop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5a5770"/>
+      <stop offset="100%" stop-color="#2a2836"/>
+    </linearGradient>
+    <linearGradient id="chipFill_prod-laptop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c2426" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0c1416" stop-opacity="0.94"/>
+    </linearGradient>
+    <linearGradient id="chipTop_prod-laptop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="scrClip_prod-laptop">
+      <rect x="515" y="115" width="170" height="120" rx="5"/>
+    </clipPath>
+    <filter id="fGlow_prod-laptop" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="fSoft_prod-laptop" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <filter id="fLed_prod-laptop" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="3.4"/></filter>
+  </defs>
+
+  <rect x="0" y="0" width="820" height="430" rx="18" fill="url(#bg_prod-laptop)"/>
+  <ellipse cx="648" cy="118" rx="148" ry="88" fill="#7d5ae0" opacity="0.06" filter="url(#fGlow_prod-laptop)"/>
+  <ellipse cx="702" cy="330" rx="108" ry="72" fill="#7d5ae0" opacity="0.05" filter="url(#fGlow_prod-laptop)"/>
+
+  <text x="72" y="52" fill="#c3b3ff" font-size="15" font-weight="700" letter-spacing="3">CHEAPDEALS</text>
+
+  <ellipse cx="602" cy="205" rx="172" ry="124" fill="url(#pglow_prod-laptop)" filter="url(#fGlow_prod-laptop)"/>
+
+  <g fill="none" stroke="#b79bf5" stroke-width="1.6" opacity="0.58" filter="url(#fSoft_prod-laptop)">
+    <path d="M278 131 C 348 131, 412 174, 474 200"/>
+    <path d="M264 209 C 340 208, 408 205, 474 205"/>
+    <path d="M300 287 C 366 287, 424 243, 474 211"/>
+  </g>
+  <circle cx="478" cy="205" r="4" fill="#dcc9ff"/>
+
+  <g>
+    <ellipse cx="600" cy="299" rx="142" ry="14" fill="#8f7cf5" opacity="0.17" filter="url(#fGlow_prod-laptop)"/>
+    <ellipse cx="600" cy="296" rx="96" ry="9" fill="#03020a" opacity="0.6" filter="url(#fGlow_prod-laptop)"/>
+    <ellipse cx="600" cy="176" rx="112" ry="84" fill="#8f7cf5" opacity="0.16" filter="url(#fGlow_prod-laptop)"/>
+
+    <g transform="rotate(-1.2 600 250)">
+      <rect x="506" y="106" width="188" height="144" rx="10" fill="url(#lidFrame_prod-laptop)" stroke="#d3ccf5" stroke-opacity="0.42" stroke-width="1.3"/>
+      <rect x="512" y="112" width="176" height="132" rx="7" fill="none" stroke="#05040c" stroke-opacity="0.55" stroke-width="1"/>
+      <rect x="515" y="115" width="170" height="120" rx="5" fill="url(#screenFill_prod-laptop)"/>
+
+      <g clip-path="url(#scrClip_prod-laptop)">
+        <g stroke="#ffffff" stroke-opacity="0.07" stroke-width="1" fill="none">
+          <path d="M528 190 H672"/>
+          <path d="M528 168 H672"/>
+          <path d="M528 146 H672"/>
+        </g>
+        <rect x="528" y="127" width="52" height="6" rx="3" fill="#c3b3ff" opacity="0.42"/>
+        <rect x="528" y="138" width="32" height="5" rx="2.5" fill="#ffffff" opacity="0.16"/>
+
+        <g fill="url(#barFill_prod-laptop)" opacity="0.9">
+          <rect x="542" y="186" width="16" height="26" rx="2.5"/>
+          <rect x="567" y="172" width="16" height="40" rx="2.5"/>
+          <rect x="592" y="178" width="16" height="34" rx="2.5"/>
+          <rect x="617" y="154" width="16" height="58" rx="2.5"/>
+          <rect x="642" y="138" width="16" height="74" rx="2.5"/>
+        </g>
+
+        <path d="M528 212 H672" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.2" fill="none"/>
+        <g fill="#ffffff" opacity="0.14">
+          <rect x="545" y="218" width="10" height="3" rx="1.5"/>
+          <rect x="570" y="218" width="10" height="3" rx="1.5"/>
+          <rect x="595" y="218" width="10" height="3" rx="1.5"/>
+          <rect x="620" y="218" width="10" height="3" rx="1.5"/>
+          <rect x="645" y="218" width="10" height="3" rx="1.5"/>
+        </g>
+
+        <path d="M550 180 L575 166 L600 172 L625 148 L650 132" fill="none" stroke="#b79bf5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" filter="url(#fLed_prod-laptop)"/>
+        <path d="M550 180 L575 166 L600 172 L625 148 L650 132" fill="none" stroke="#e4dbff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="650" cy="132" r="6" fill="#c3b3ff" opacity="0.6" filter="url(#fLed_prod-laptop)"/>
+        <circle cx="650" cy="132" r="3.4" fill="#ffffff" opacity="0.92"/>
+
+        <path d="M498 250 L588 100 L626 100 L536 250 Z" fill="url(#screenSheen_prod-laptop)"/>
+      </g>
+
+      <rect x="515" y="115" width="170" height="120" rx="5" fill="none" stroke="#cdc3f7" stroke-opacity="0.3" stroke-width="1"/>
+      <circle cx="600" cy="110.5" r="1.9" fill="#8f7cf5" opacity="0.75"/>
+      <circle cx="600" cy="243" r="2.4" fill="#c3b3ff" opacity="0.55"/>
+    </g>
+
+    <rect x="508" y="245" width="184" height="9" rx="4.5" fill="url(#hingeFill_prod-laptop)"/>
+
+    <path d="M506 250 L694 250 L720 288 L480 288 Z" fill="url(#deckFill_prod-laptop)" stroke="#ffffff" stroke-opacity="0.2" stroke-width="1"/>
+    <path d="M506 250 L694 250 L705 266 L495 266 Z" fill="#8f7cf5" opacity="0.1" filter="url(#fSoft_prod-laptop)"/>
+
+    <g stroke="#6b7183" stroke-opacity="0.85" stroke-width="2.6" stroke-linecap="round" fill="none">
+      <path d="M530.5 252 H540.8"/><path d="M544.8 252 H555.1"/><path d="M559.1 252 H569.4"/><path d="M573.4 252 H583.7"/><path d="M587.7 252 H598"/><path d="M602 252 H612.3"/><path d="M616.3 252 H626.6"/><path d="M630.6 252 H640.9"/><path d="M644.9 252 H655.2"/><path d="M659.2 252 H669.5"/>
+      <path d="M525.5 259 H536.8"/><path d="M540.8 259 H552.1"/><path d="M556.1 259 H567.4"/><path d="M571.4 259 H582.7"/><path d="M586.7 259 H598"/><path d="M602 259 H613.3"/><path d="M617.3 259 H628.6"/><path d="M632.6 259 H643.9"/><path d="M647.9 259 H659.2"/><path d="M663.2 259 H674.5"/>
+      <path d="M519 266 H537"/><path d="M541 266 H557"/><path d="M561 266 H639"/><path d="M643 266 H659"/><path d="M663 266 H681"/>
+    </g>
+
+    <path d="M569.5 272 L630.5 272 L634 282 L566 282 Z" fill="url(#padFill_prod-laptop)" stroke="#787e92" stroke-opacity="0.75" stroke-width="1"/>
+
+    <path d="M480 288 L720 288 L715 295 Q600 299 485 295 Z" fill="url(#deckLip_prod-laptop)"/>
+    <path d="M481 288 H719" stroke="#ffffff" stroke-opacity="0.26" stroke-width="1" fill="none"/>
+    <path d="M591 292 H609" stroke="#3d4150" stroke-opacity="0.7" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+  </g>
+
+  <g>
+    <rect x="70" y="102" width="208" height="58" rx="15" fill="url(#chipFill_prod-laptop)" stroke="#b3a2f0" stroke-opacity="0.22" stroke-width="1"/>
+    <rect x="70" y="102" width="208" height="29" rx="15" fill="url(#chipTop_prod-laptop)"/>
+    <circle cx="96" cy="131" r="11" fill="#24c9a6"/>
+    <path d="M91.8 131.2 L94.8 134.2 L100.4 127.8" fill="none" stroke="#04120f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(118,119)" fill="none" stroke="#d6f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="6" y="6" width="14" height="14" rx="2"/>
+      <rect x="10.5" y="10.5" width="5" height="5" rx="1"/>
+      <path d="M10 6 V2"/><path d="M16 6 V2"/>
+      <path d="M10 20 V24"/><path d="M16 20 V24"/>
+      <path d="M6 10 H2"/><path d="M6 16 H2"/>
+      <path d="M20 10 H24"/><path d="M20 16 H24"/>
+    </g>
+    <text x="152" y="137" fill="#eaf5f3" font-size="15.5" font-weight="600">Intel Core i7</text>
+
+    <rect x="50" y="180" width="214" height="58" rx="15" fill="url(#chipFill_prod-laptop)" stroke="#b3a2f0" stroke-opacity="0.22" stroke-width="1"/>
+    <rect x="50" y="180" width="214" height="29" rx="15" fill="url(#chipTop_prod-laptop)"/>
+    <circle cx="76" cy="209" r="11" fill="#24c9a6"/>
+    <path d="M71.8 209.2 L74.8 212.2 L80.4 205.8" fill="none" stroke="#04120f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(98,197)" fill="none" stroke="#d6f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="6" width="20" height="12" rx="1.8"/>
+      <path d="M7.5 9.5 V14.5"/><path d="M11.5 9.5 V14.5"/><path d="M15.5 9.5 V14.5"/><path d="M19 9.5 V14.5"/>
+      <path d="M7 18 V21"/><path d="M19 18 V21"/>
+    </g>
+    <text x="132" y="205" fill="#eaf5f3" font-size="15.5" font-weight="600">16 GB RAM</text>
+    <text x="132" y="223" fill="#a9a2c9" font-size="13.5" font-weight="500">512 GB SSD</text>
+
+    <rect x="92" y="258" width="224" height="58" rx="15" fill="url(#chipFill_prod-laptop)" stroke="#b3a2f0" stroke-opacity="0.22" stroke-width="1"/>
+    <rect x="92" y="258" width="224" height="29" rx="15" fill="url(#chipTop_prod-laptop)"/>
+    <circle cx="118" cy="287" r="11" fill="#24c9a6"/>
+    <path d="M113.8 287.2 L116.8 290.2 L122.4 283.8" fill="none" stroke="#04120f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(140,275)" fill="none" stroke="#d6f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="4" y="4" width="20" height="14" rx="2"/>
+      <path d="M2 21 H26"/>
+    </g>
+    <text x="174" y="293" fill="#eaf5f3" font-size="15.5" font-weight="600">15-inch display</text>
+  </g>
+
+  <text x="72" y="388" fill="#f0f8f7" font-size="25" font-weight="700">CheapDeals Laptop Pro 15</text>
+  <text x="72" y="414" fill="#c3b3ff" font-size="16" font-weight="600">£599.00</text>
+</svg>

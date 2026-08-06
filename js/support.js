@@ -44,10 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
           let html = '';
           msgs.forEach(m => {
             const isUser = m.sender === 'user';
-            const isProductLink = m.message.indexOf('[Liên kết sản phẩm]:') !== -1;
+            const isProductLink = m.message.indexOf('[Product Link]:') !== -1;
             let displayMsg = m.message;
             if (isProductLink) {
-              displayMsg = m.message.replace('[Liên kết sản phẩm]:', '📦 *Product Inquiry:* ');
+              displayMsg = m.message.replace('[Product Link]:', '📦 *Product Inquiry:* ');
             }
             
             const alignment = isUser ? 'margin-left:auto; background:#007bff; color:#fff;' : 'background:#e9ecef; color:#000;';

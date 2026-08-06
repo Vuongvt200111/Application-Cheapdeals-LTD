@@ -22,10 +22,10 @@ require __DIR__ . '/../layout/header.php';
         
         <?php foreach ($msgs as $m): ?>
             <?php
-            $isProductLink = (strpos($m['message'], '[Liên kết sản phẩm]:') !== false);
+            $isProductLink = (strpos($m['message'], '[Product Link]:') !== false);
             $displayMsg = $m['message'];
             if ($isProductLink) {
-                $displayMsg = str_replace('[Liên kết sản phẩm]:', '📦 *Product Inquiry:* ', $m['message']);
+                $displayMsg = str_replace('[Product Link]:', '📦 *Product Inquiry:* ', $m['message']);
             }
             ?>
             <div class="bubble <?= $m['sender'] === 'user' ? 'user' : 'staff' ?>" 

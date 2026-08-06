@@ -21,7 +21,7 @@ class SupportController extends BaseController {
                 $msg = trim($_POST['message'] ?? '');
                 if (!empty($_POST['attached_package'])) {
                     $pkgInfo = trim($_POST['attached_package']);
-                    $msg = "[Liên kết sản phẩm]: " . $pkgInfo . "\n" . $msg;
+                    $msg = "[Product Link]: " . $pkgInfo . "\n" . $msg;
                 }
                 if ($msg !== '') {
                     Ticket::reply($this->me['id'], 'user', $msg);
@@ -37,7 +37,7 @@ class SupportController extends BaseController {
             $msg = trim($_POST['message'] ?? '');
             if (!empty($_POST['attached_package'])) {
                 $pkgInfo = trim($_POST['attached_package']);
-                $msg = "[Liên kết sản phẩm]: " . $pkgInfo . "\n" . $msg;
+                $msg = "[Product Link]: " . $pkgInfo . "\n" . $msg;
             }
             if ($msg !== '') {
                 Ticket::reply($this->me['id'], 'user', $msg);

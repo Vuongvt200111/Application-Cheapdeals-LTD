@@ -8,6 +8,17 @@ require_once __DIR__ . '/../models/Product.php';
 
 class AccountController extends BaseController {
     public function dashboard() {
+        // Handle Refund request action (BUG-REFUND/Fix)
+        if (isset($_GET['act']) && $_GET['act'] === 'refund') {
+            $orderId = (int)($_GET['id'] ?? 0);
+            if ($orderId > 0) {
+                $s = $this->pdo->prepare("UPDATE orders SET status = 'Refund Requested' WHERE id = ? AND user_id = ?");
+                $s->execute([$orderId, $this->me['id']]);
+                redirect('account.php?tab=billing&msg=' . urlencode('Refund request submitted successfully! Status updated to Refund Requested.'));
+                return;
+            }
+        }
+
         if (!$this->me) {
             redirect('login.php');
         }
@@ -25,8 +36,15 @@ class AccountController extends BaseController {
                 
                 $logPath = dirname(__DIR__) . '/email_codes.log';
                 @file_put_contents($logPath, "[" . date('Y-m-d H:i:s') . "] [" . $this->me['email'] . "] Security Code: $code\n", FILE_APPEND);
+                $subject = "CheapDeals Security Verification Code - $code";
+                $message = "Dear Valued Customer,\n\nThank you for choosing CheapDeals!\n\nYour 6-digit security verification code for profile/password updates is: $code\n\nPlease enter this code on your Profile page to complete verification. This code is valid for 15 minutes.\n\nWe wish you a wonderful day!\n\nSincerely,\nCheapDeals LTD Support Team";
+                $headers = "From: CheapDeals Support <no-reply@cheapdeals.com>\r\n" .
+                           "Reply-To: no-reply@cheapdeals.com\r\n" .
+                           "X-Mailer: PHP/" . phpversion() . "\r\n" .
+                           "MIME-Version: 1.0\r\n" .
+                           "Content-Type: text/plain; charset=UTF-8\r\n";
                 try {
-                    @mail($this->me['email'], "CheapDeals Security Verification Code", "Your verification code is: $code", "From: no-reply@cheapdeals.com");
+                    @mail($this->me['email'], $subject, $message, $headers);
                 } catch (Throwable $e) {}
                 
                 echo json_encode(['success' => true, 'message' => 'Verification code sent! (Check email_codes.log in project root if local SMTP is off)']);

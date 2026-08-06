@@ -71,7 +71,8 @@ class StaffController extends BaseController {
             'requirements' => $requirements,
             'escMap' => $escMap,
             'filterCustomer' => $filterCustomer,
-            'sortTotal' => $sortTotal
+            'sortTotal' => $sortTotal,
+            'imageLibrary' => function_exists('cd_image_library') ? cd_image_library($this->pdo) : []
         ]);
     }
 

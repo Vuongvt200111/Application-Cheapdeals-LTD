@@ -1,4 +1,64 @@
 <?php
+if (!function_exists('cd_image_cell')) {
+    function cd_image_cell($code) {
+        $img = function_exists('cd_product_card_image') ? cd_product_card_image($code) : '';
+        ob_start();
+        ?>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <?php if ($img !== ''): ?>
+                <img src="<?= htmlspecialchars($img, ENT_QUOTES) ?>" alt="" style="width:64px; height:40px; object-fit:contain; border-radius:4px; background:rgba(0,0,0,0.2);">
+            <?php else: ?>
+                <div style="width:64px; height:40px; border-radius:4px; border:1px dashed var(--line); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--muted);">No img</div>
+            <?php endif; ?>
+            <label style="cursor:pointer; margin:0; font-size:11px; padding:4px 8px; background:var(--card); border:1px solid var(--line); border-radius:4px; color:var(--ink); font-weight:600; display:inline-block;" title="Upload new picture">
+                Choose File
+                <input type="file" name="image" accept=".svg,.png,.jpg,.jpeg,.webp,.gif" style="display:none;" onchange="var fn=this.parentNode.nextElementSibling; if(fn){ fn.textContent = this.files[0] ? this.files[0].name : 'No file chosen'; }">
+            </label>
+            <span style="font-size:10px; color:var(--muted); max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">No file chosen</span>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+}
+
+if (!function_exists('cd_image_picker')) {
+    function cd_image_picker($library = [], $current = '') {
+        ob_start();
+        ?>
+        <div style="margin-top:10px; margin-bottom:10px;">
+            <label style="display:block; margin-bottom:4px; font-size:12px; font-weight:600;">Product Picture (Optional)</label>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+              <label style="cursor:pointer; margin:0; font-size:12px; padding:6px 12px; background:var(--card); border:1px solid var(--line); border-radius:6px; color:var(--ink); font-weight:600; display:inline-block;">
+                Choose File
+                <input type="file" name="image" accept=".svg,.png,.jpg,.jpeg,.webp,.gif" style="display:none;" onchange="var fn=this.parentNode.nextElementSibling; if(fn){ fn.textContent = this.files[0] ? this.files[0].name : 'No file chosen'; }">
+              </label>
+              <span style="font-size:12px; color:var(--muted);">No file chosen</span>
+            </div>
+            <label style="display:block; margin-bottom:4px; font-size:11px; color:var(--muted);">Or reuse an existing artwork:</label>
+            <select name="image_from" style="width:100%; max-width:260px; font-size:12px; padding:4px;">
+                <option value="">-- None --</option>
+                <?php if (!empty($library) && is_array($library)): ?>
+                    <?php foreach ($library as $k => $item): ?>
+                        <?php 
+                            $cCode = is_array($item) ? ($item['code'] ?? '') : (is_string($k) ? $k : $item);
+                            $cLabel = is_array($item) ? ($item['label'] ?? $cCode) : (is_string($item) ? $item : $cCode);
+                        ?>
+                        <option value="<?= htmlspecialchars($cCode, ENT_QUOTES) ?>"><?= htmlspecialchars($cLabel, ENT_QUOTES) ?></option>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </select>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+}
+
+if (!isset($imageLibrary) || !is_array($imageLibrary)) {
+    global $pdo;
+    $imageLibrary = function_exists('cd_image_library') ? cd_image_library($pdo ?? null) : [];
+}
+?>
+<?php
 $cur = 'staff.php'; $pageTitle = 'Staff Panel';
 require __DIR__ . '/../layout/header.php';
 ?>
@@ -17,7 +77,9 @@ require __DIR__ . '/../layout/header.php';
   
   <h3 class="sec-h">1. Telecom Subscription Packages</h3>
   <div class="table-scroll"><table>
-    <thead><tr><th>Name</th><th>Category</th><th>Tier</th><th>Price (£)</th><th>Inventory</th><th>Actions</th></tr></thead>
+    <thead><tr><th>Name</th><th>Category</th><th>Tier</th><th>Price (£)</th><th>Inventory</th><th>Picture</th>
+                        <th>Picture</th>
+                        <th>Actions</th></tr></thead>
     <tbody>
     <?php foreach ($pkgs as $p): ?>
       <tr>
@@ -31,7 +93,7 @@ require __DIR__ . '/../layout/header.php';
             <input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" min="0" oninput="if(this.value<0)this.value=0;" value="<?= $p['inventory'] ?>" style="width:70px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink)">
           </td>
           <td>
-            <button class="btn small" type="submit">Save</button>
+            <?= cd_image_cell($p["code"] ?? "") ?></td><td><button class="btn small" type="submit">Save</button>
           </td>
         </form>
         <td>
@@ -47,7 +109,7 @@ require __DIR__ . '/../layout/header.php';
 
   <div class="panel" style="max-width:520px;margin-top:18px">
     <h3 class="sec-h" style="margin-top:0">Add new Telecom Option</h3>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
       <input type="hidden" name="act" value="addPkg"><input type="hidden" name="back" value="packages">
       <div class="fg"><label>Name</label><input name="name" required></div>
       <div class="two-col">
@@ -69,15 +131,18 @@ require __DIR__ . '/../layout/header.php';
       </div>
       <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" value="10" required></div>
       <div class="fg"><label>Features (one per line)</label><textarea name="features" rows="3" placeholder="1 mobile phone&#10;500 free minutes" required></textarea></div>
+                <?= cd_image_picker($imageLibrary) ?>
       <button class="btn" type="submit">Create option</button>
     </form>
   </div>
 
   <hr style="border:0; border-top: 1px solid var(--line); margin: 30px 0;">
 
-  <h3 class="sec-h">2. Hardware Devices (Phần cứng)</h3>
+  <h3 class="sec-h">2. Hardware Devices</h3>
   <div class="table-scroll"><table>
-    <thead><tr><th>Name</th><th>Price (£)</th><th>Inventory</th><th>Description</th><th>Actions</th></tr></thead>
+    <thead><tr><th>Name</th><th>Price (£)</th><th>Inventory</th><th>Description</th><th>Picture</th>
+                        <th>Picture</th>
+                        <th>Actions</th></tr></thead>
     <tbody>
     <?php foreach ($prods as $p): ?>
       <tr>
@@ -94,7 +159,7 @@ require __DIR__ . '/../layout/header.php';
             <textarea name="description" style="width:200px;height:45px;padding:6px;border:1px solid var(--line);border-radius:7px;background:var(--card);color:var(--ink);font-size:11px;"><?= esc($p['description']) ?></textarea>
           </td>
           <td>
-            <button class="btn small" type="submit">Save</button>
+            <?= cd_image_cell($p["code"] ?? "") ?></td><td><button class="btn small" type="submit">Save</button>
           </td>
         </form>
         <td>
@@ -110,7 +175,7 @@ require __DIR__ . '/../layout/header.php';
 
   <div class="panel" style="max-width:520px;margin-top:18px">
     <h3 class="sec-h" style="margin-top:0">Add new Hardware Device</h3>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
       <input type="hidden" name="act" value="addProd"><input type="hidden" name="back" value="packages">
       <div class="fg"><label>Product Name</label><input name="name" placeholder="e.g. CheapDeals Gaming Laptop" required></div>
       <div class="two-col">
@@ -118,6 +183,7 @@ require __DIR__ . '/../layout/header.php';
         <div class="fg"><label>Inventory Stock</label><input name="inventory" type="number" min="0" oninput="if(this.value<0)this.value=0;" min="0" oninput="if(this.value<0)this.value=0;" value="10" min="0" oninput="if(this.value<0)this.value=0;" required></div>
       </div>
       <div class="fg"><label>Product Description</label><textarea name="description" rows="3" placeholder="Enter short product specifications..." required></textarea></div>
+      <?= cd_image_picker($imageLibrary) ?>
       <button class="btn" type="submit">Create Hardware</button>
     </form>
   </div>
@@ -185,13 +251,13 @@ require __DIR__ . '/../layout/header.php';
         <td style="padding:10px;">
           <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
             <?php if ($r['status'] === 'Pending'): ?>
-              <form method="post" style="margin:0">
+              <form enctype="multipart/form-data" method="post" style="margin:0">
                 <input type="hidden" name="act" value="confirmRequirement">
                 <input type="hidden" name="req_id" value="<?= $r['id'] ?>">
                 <button class="btn small block" type="submit" style="padding:6px 10px;">Confirm</button>
               </form>
             <?php endif; ?>
-            <form method="post" onsubmit="return confirm('Delete this requirement?')" style="margin:0">
+            <form enctype="multipart/form-data" method="post" onsubmit="return confirm('Delete this requirement?')" style="margin:0">
               <input type="hidden" name="act" value="deleteRequirement">
               <input type="hidden" name="req_id" value="<?= $r['id'] ?>">
               <button class="btn small danger block" type="submit" style="padding:6px 10px;">Delete</button>
@@ -206,7 +272,7 @@ require __DIR__ . '/../layout/header.php';
 <?php else: ?>
         <!-- Supplement to FR28: SLA Technical Escalation Dashboard Component (BUG-021) -->
         <div style="padding:12px; background:rgba(255, 193, 7, 0.1); border:1px solid #ffc107; border-radius:8px; margin-bottom:15px;">
-            <form method="post" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0;">
+            <form enctype="multipart/form-data" method="post" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:0;">
                 <input type="hidden" name="act" value="escalateTicket">
                 <input type="hidden" name="user_id" value="<?= $uid ?>">
                 <span style="font-weight:bold; font-size:13px; color:#b58100;">⚡ SLA Action Panel:</span>
@@ -253,7 +319,7 @@ require __DIR__ . '/../layout/header.php';
             </div>
           <?php endforeach; ?>
         </div>
-        <form method="post" class="chat-input">
+        <form enctype="multipart/form-data" method="post" class="chat-input">
           <input type="hidden" name="act" value="reply"><input type="hidden" name="user_id" value="<?= $uid ?>">
           <input name="message" placeholder="Type a reply..." required><button class="btn" type="submit">Reply</button>
         </form>
@@ -266,7 +332,7 @@ require __DIR__ . '/../layout/header.php';
   <div class="panel" style="max-width:560px; margin-top: 0;">
     <h3 class="sec-h" style="margin-top:0">🎟️ Potential member benefits</h3>
     <p class="lead" style="margin-top:0">Filter users by consumption logs and dispatch a targeted voucher campaign code instantly.</p>
-    <form method="post" style="display:flex; flex-direction:column; gap:12px;">
+    <form enctype="multipart/form-data" method="post" style="display:flex; flex-direction:column; gap:12px;">
       <input type="hidden" name="act" value="issueCohortVoucher">
       <input type="hidden" name="back" value="vouchers">
       <div class="two-col">
@@ -338,13 +404,13 @@ require __DIR__ . '/../layout/header.php';
         <td style="padding:10px;">
           <div style="display:flex; flex-direction:column; gap:6px; align-items:stretch;">
             <?php if ($r['status'] === 'Pending'): ?>
-              <form method="post" style="margin:0">
+              <form enctype="multipart/form-data" method="post" style="margin:0">
                 <input type="hidden" name="act" value="confirmRequirement">
                 <input type="hidden" name="req_id" value="<?= $r['id'] ?>">
                 <button class="btn small block" type="submit" style="padding:6px 10px;">Confirm</button>
               </form>
             <?php endif; ?>
-            <form method="post" onsubmit="return confirm('Delete this requirement?')" style="margin:0">
+            <form enctype="multipart/form-data" method="post" onsubmit="return confirm('Delete this requirement?')" style="margin:0">
               <input type="hidden" name="act" value="deleteRequirement">
               <input type="hidden" name="req_id" value="<?= $r['id'] ?>">
               <button class="btn small danger block" type="submit" style="padding:6px 10px;">Delete</button>
@@ -359,7 +425,7 @@ require __DIR__ . '/../layout/header.php';
 <?php elseif ($tab === 'orders'): ?>
   <!-- SEARCH FILTER TOOLBAR INTERFACE FOR ORDERS (BUG-Nam/Orders) -->
   <div class="panel" style="margin-bottom: 18px; padding: 14px;">
-    <form method="get" action="staff.php" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin: 0;">
+    <form enctype="multipart/form-data" method="get" action="staff.php" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin: 0;">
       <input type="hidden" name="tab" value="orders">
 
       <!-- SEARCH FILTER FOR CUSTOMER NAME -->

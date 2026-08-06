@@ -17,7 +17,7 @@ function sendResetEmail($email, $code) {
     global $pdo;
     saveEmailVerificationCode($pdo, $email, $code);
     $subject = "CheapDeals Password Reset Verification Code - $code";
-    $message = "Hello,\n\nYour CheapDeals 6-digit password reset verification code is: $code\n\nPlease enter this code to reset your password. This code will expire in 15 minutes.\n\nThank you,\nCheapDeals Team";
+    $message = "Dear Valued Customer,\n\nThank you for choosing CheapDeals!\n\nYour 6-digit password reset verification code is: $code\n\nPlease enter this code on the verification page to complete your password reset. This code is valid for 15 minutes.\n\nIf you did not request this, please ignore this email.\n\nWe wish you a wonderful day!\n\nSincerely,\nCheapDeals LTD Support Team";
     $headers = "From: CheapDeals Support <no-reply@cheapdeals.com>\r\n" .
                "Reply-To: no-reply@cheapdeals.com\r\n" .
                "X-Mailer: PHP/" . phpversion() . "\r\n" .

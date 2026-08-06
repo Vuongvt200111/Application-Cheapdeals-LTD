@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 430" width="820" height="430" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <radialGradient id="bg_prod-mouse" cx="60%" cy="45%" r="80%">
+      <stop offset="0%" stop-color="#122a33"/>
+      <stop offset="55%" stop-color="#091519"/>
+      <stop offset="100%" stop-color="#04080a"/>
+    </radialGradient>
+    <radialGradient id="pglow_prod-mouse" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4ec8e8" stop-opacity="0.5"/>
+      <stop offset="45%" stop-color="#2a8ab0" stop-opacity="0.17"/>
+      <stop offset="100%" stop-color="#2a8ab0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mBody_prod-mouse" gradientUnits="userSpaceOnUse" x1="-14" y1="-94" x2="14" y2="92">
+      <stop offset="0%" stop-color="#f7fafb"/>
+      <stop offset="20%" stop-color="#dfe7ec"/>
+      <stop offset="48%" stop-color="#bcc6cd"/>
+      <stop offset="74%" stop-color="#98a3ab"/>
+      <stop offset="100%" stop-color="#6f7a82"/>
+    </linearGradient>
+    <linearGradient id="mShade_prod-mouse" gradientUnits="userSpaceOnUse" x1="-65" y1="0" x2="65" y2="0">
+      <stop offset="0%" stop-color="#0f171d" stop-opacity="0.28"/>
+      <stop offset="12%" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="34%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="64%" stop-color="#1b242b" stop-opacity="0.12"/>
+      <stop offset="88%" stop-color="#141c22" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#0b1116" stop-opacity="0.55"/>
+    </linearGradient>
+    <radialGradient id="mHump_prod-mouse" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mWheel_prod-mouse" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2b333a"/>
+      <stop offset="35%" stop-color="#586570"/>
+      <stop offset="65%" stop-color="#3d4750"/>
+      <stop offset="100%" stop-color="#1b2126"/>
+    </linearGradient>
+    <linearGradient id="chipFill_prod-mouse" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1c2426" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0c1416" stop-opacity="0.94"/>
+    </linearGradient>
+    <linearGradient id="chipTop_prod-mouse" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="fGlow_prod-mouse" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="7"/></filter>
+    <filter id="fSoft_prod-mouse" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <filter id="fEdge_prod-mouse" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2"/></filter>
+  </defs>
+
+  <rect x="0" y="0" width="820" height="430" rx="18" fill="url(#bg_prod-mouse)"/>
+  <ellipse cx="648" cy="122" rx="150" ry="90" fill="#2f9fc4" opacity="0.06" filter="url(#fGlow_prod-mouse)"/>
+  <ellipse cx="700" cy="326" rx="102" ry="76" fill="#2f9fc4" opacity="0.05" filter="url(#fGlow_prod-mouse)"/>
+
+  <text x="72" y="52" fill="#7fd8e9" font-size="15" font-weight="700" letter-spacing="3">CHEAPDEALS</text>
+
+  <ellipse cx="600" cy="205" rx="168" ry="122" fill="url(#pglow_prod-mouse)" filter="url(#fGlow_prod-mouse)"/>
+
+  <g fill="none" stroke="#7fd8e9" stroke-width="1.6" opacity="0.58" filter="url(#fSoft_prod-mouse)">
+    <path d="M284 121 C 356 121, 418 170, 478 201"/>
+    <path d="M262 199 C 340 199, 412 203, 478 205"/>
+    <path d="M336 277 C 386 277, 432 240, 478 210"/>
+  </g>
+  <circle cx="478" cy="205" r="4" fill="#c9f0ff"/>
+
+  <ellipse cx="600" cy="298" rx="116" ry="26" fill="#4ec8e8" opacity="0.20" filter="url(#fGlow_prod-mouse)"/>
+  <ellipse cx="606" cy="306" rx="94" ry="16" fill="#02070a" opacity="0.62" filter="url(#fGlow_prod-mouse)"/>
+
+  <g transform="translate(600,200) scale(1.06) rotate(-7)">
+    <ellipse cx="0" cy="18" rx="65" ry="74" fill="url(#mBody_prod-mouse)"/>
+    <path d="M -64 6 C -65 -46, -31 -94, 0 -94 C 31 -94, 65 -46, 64 6 Z" fill="url(#mBody_prod-mouse)"/>
+
+    <ellipse cx="-24" cy="-46" rx="15" ry="24" fill="#ffffff" opacity="0.28" filter="url(#fSoft_prod-mouse)"/>
+    <ellipse cx="-20" cy="26" rx="30" ry="34" fill="#ffffff" opacity="0.13" filter="url(#fSoft_prod-mouse)"/>
+    <ellipse cx="-6" cy="30" rx="46" ry="50" fill="url(#mHump_prod-mouse)"/>
+
+    <path d="M 0 -94 C 31 -94, 65 -46, 64.4 8 C 65 12, 65 15, 65 18 C 65 58.9, 35.9 92, 0 92 C -35.9 92, -65 58.9, -65 18 C -65 15, -65 12, -64.4 8 C -65 -46, -31 -94, 0 -94 Z" fill="url(#mShade_prod-mouse)"/>
+    <path d="M 0 -94 C 31 -94, 65 -46, 64.4 8 C 65 12, 65 15, 65 18 C 65 58.9, 35.9 92, 0 92 C -35.9 92, -65 58.9, -65 18 C -65 15, -65 12, -64.4 8 C -65 -46, -31 -94, 0 -94 Z" fill="none" stroke="#ffffff" stroke-opacity="0.30" stroke-width="1.3"/>
+
+    <path d="M -63 -5 C -38 6, 38 6, 63 -5" fill="none" stroke="#7e8990" stroke-width="2" stroke-linecap="round" opacity="0.72"/>
+    <path d="M -60 -1 C -37 9, 37 9, 60 -1" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity="0.26"/>
+
+    <path d="M 0 -91 L 0 -79" fill="none" stroke="#79848c" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+    <path d="M 1.6 -90 L 1.6 -80" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity="0.4"/>
+    <path d="M 0 -20 L 0 -4" fill="none" stroke="#79848c" stroke-width="2.4" stroke-linecap="round" opacity="0.85"/>
+    <path d="M 1.6 -19 L 1.6 -5" fill="none" stroke="#ffffff" stroke-width="1.1" stroke-linecap="round" opacity="0.4"/>
+
+    <rect x="-11" y="-79" width="22" height="42" rx="11" fill="#3b444c"/>
+    <rect x="-9.5" y="-77.5" width="19" height="39" rx="9.5" fill="#1e242a"/>
+    <rect x="-4.6" y="-71" width="9.2" height="27" rx="4.6" fill="#4ec8e8" opacity="0.35" filter="url(#fSoft_prod-mouse)"/>
+    <rect x="-7" y="-73" width="14" height="32" rx="7" fill="url(#mWheel_prod-mouse)" stroke="#10161a" stroke-width="0.8"/>
+    <g stroke="#8c9aa4" stroke-width="1" stroke-linecap="round" opacity="0.7">
+      <path d="M -4.6 -66 H 4.6"/>
+      <path d="M -4.6 -60 H 4.6"/>
+      <path d="M -4.6 -54 H 4.6"/>
+      <path d="M -4.6 -48 H 4.6"/>
+    </g>
+
+    <rect x="-8" y="-34" width="16" height="11" rx="5.5" fill="#b3bdc4" stroke="#7d878e" stroke-width="0.8"/>
+    <rect x="-6" y="-32.4" width="12" height="4" rx="2" fill="#ffffff" opacity="0.5"/>
+
+    <path d="M -58 28 C -57 52, -46 74, -24 84 C -16 88, -8 88.5, 0 88.5 C 8 88.5, 16 88, 24 84 C 46 74, 57 52, 58 28" fill="none" stroke="#4ec8e8" stroke-width="3.6" opacity="0.5" filter="url(#fEdge_prod-mouse)"/>
+    <path d="M -57 30 C -56 52, -45 72, -24 82 C -16 86, -8 86.5, 0 86.5 C 8 86.5, 16 86, 24 82 C 45 72, 56 52, 57 30" fill="none" stroke="#a6ebfb" stroke-width="1.5" opacity="0.9"/>
+
+    <circle cx="0" cy="64" r="5" fill="#4ec8e8" opacity="0.4" filter="url(#fSoft_prod-mouse)"/>
+    <circle cx="0" cy="64" r="2.2" fill="#dff6ff"/>
+  </g>
+
+  <g>
+    <rect x="70" y="93" width="214" height="56" rx="15" fill="url(#chipFill_prod-mouse)" stroke="#8ecfe4" stroke-opacity="0.22" stroke-width="1"/>
+    <rect x="70" y="93" width="214" height="28" rx="15" fill="url(#chipTop_prod-mouse)"/>
+    <circle cx="96" cy="121" r="11" fill="#24c9a6"/>
+    <path d="M91.8 121.2 L94.8 124.2 L100.4 117.8" fill="none" stroke="#04120f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(118,109)" fill="none" stroke="#d6f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 7 H23"/><path d="M3 17 H23"/><circle cx="10" cy="7" r="3"/><circle cx="17" cy="17" r="3"/>
+    </g>
+    <text x="152" y="127" fill="#eaf5f3" font-size="15.5" font-weight="600">Adjustable DPI</text>
+
+    <rect x="50" y="171" width="212" height="56" rx="15" fill="url(#chipFill_prod-mouse)" stroke="#8ecfe4" stroke-opacity="0.22" stroke-width="1"/>
+    <rect x="50" y="171" width="212" height="28" rx="15" fill="url(#chipTop_prod-mouse)"/>
+    <circle cx="76" cy="199" r="11" fill="#24c9a6"/>
+    <path d="M71.8 199.2 L74.8 202.2 L80.4 195.8" fill="none" stroke="#04120f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(98,187)" fill="none" stroke="#d6f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9 H8 L13 4 V20 L8 15 H3 Z"/><path d="M17 9 L23 15"/><path d="M23 9 L17 15"/>
+    </g>
+    <text x="132" y="205" fill="#eaf5f3" font-size="15.5" font-weight="600">Silent clicks</text>
+
+    <rect x="92" y="249" width="244" height="56" rx="15" fill="url(#chipFill_prod-mouse)" stroke="#8ecfe4" stroke-opacity="0.22" stroke-width="1"/>
+    <rect x="92" y="249" width="244" height="28" rx="15" fill="url(#chipTop_prod-mouse)"/>
+    <circle cx="118" cy="277" r="11" fill="#24c9a6"/>
+    <path d="M113.8 277.2 L116.8 280.2 L122.4 273.8" fill="none" stroke="#04120f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <g transform="translate(140,265)" fill="none" stroke="#d6f2ec" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="2" y="6" width="19" height="12" rx="3"/><path d="M23 10 V14"/><path d="M6 9.5 V14.5"/><path d="M10 9.5 V14.5"/><path d="M14 9.5 V14.5"/>
+    </g>
+    <text x="174" y="283" fill="#eaf5f3" font-size="15.5" font-weight="600">Long battery life</text>
+  </g>
+
+  <text x="72" y="390" fill="#f0f8f7" font-size="26" font-weight="700">CheapDeals Wireless Mouse</text>
+  <text x="72" y="416" fill="#7fd8e9" font-size="16" font-weight="600">£15.00</text>
+</svg>

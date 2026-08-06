@@ -11,3 +11,30 @@ header.nav{padding:12px 26px}
 /* account layout keeps its two columns on desktop (base already handles) */
 .view-toggle{border:1px solid var(--neon);color:var(--neon);border-radius:9px;padding:6px 10px;font-size:13px;font-weight:600;background:transparent;cursor:pointer}
 .view-toggle:hover{background:rgba(0,229,255,.08)}
+
+
+/* Standard English File Upload Button Styling */
+input[type="file"]::file-selector-button {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--card, #1e293b);
+  color: var(--ink, #f8fafc);
+  border: 1px solid var(--line, #334155);
+  cursor: pointer;
+  margin-right: 8px;
+}
+input[type="file"]::-webkit-file-upload-button {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--card, #1e293b);
+  color: var(--ink, #f8fafc);
+  border: 1px solid var(--line, #334155);
+  cursor: pointer;
+  margin-right: 8px;
+}

@@ -438,3 +438,30 @@ html[data-theme="dark"] .msg.err{background:#3f1414;color:#fca5a5}
 .card { display:flex; flex-direction:column; height:100%; }
 .card-body { flex:1; display:flex; flex-direction:column; }
 .card-footer, .card .btn-group { margin-top:auto; }
+
+
+/* Standard English File Upload Button Styling */
+input[type="file"]::file-selector-button {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--card, #1e293b);
+  color: var(--ink, #f8fafc);
+  border: 1px solid var(--line, #334155);
+  cursor: pointer;
+  margin-right: 8px;
+}
+input[type="file"]::-webkit-file-upload-button {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--card, #1e293b);
+  color: var(--ink, #f8fafc);
+  border: 1px solid var(--line, #334155);
+  cursor: pointer;
+  margin-right: 8px;
+}

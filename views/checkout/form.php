@@ -74,7 +74,18 @@ require __DIR__ . '/../layout/header.php';
 
   <div class="fg">
     <label>Name on card</label>
-    <input id="co-cn" required value="<?= esc($ME['name']) ?>">
+    <input id="co-cn" name="co_cn" required value="<?= esc($ME['name'] ?? '') ?>" placeholder="e.g. Full Name">
+  </div>
+  
+  <div class="two-col">
+    <div class="fg">
+      <label>Contact Phone (from Profile)</label>
+      <input id="co-phone" name="co_phone" required value="<?= esc($ME['phone'] ?? '') ?>" placeholder="e.g. 0912345678">
+    </div>
+    <div class="fg">
+      <label>Delivery Address (from Profile)</label>
+      <input id="co-address" name="co_address" required value="<?= esc($ME['address'] ?? '') ?>" placeholder="e.g. 123 Greenwich High St, London">
+    </div>
   </div>
   
   <div class="fg">

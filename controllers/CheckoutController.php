@@ -110,10 +110,13 @@ class CheckoutController extends BaseController {
             $hash = password_hash($payment_pin, PASSWORD_DEFAULT);
             $this->pdo->prepare('UPDATE users SET payment_pin_hash=? WHERE id=?')->execute([$hash, $this->me['id']]);
             
-            // Also auto-save credit card to profile
-            $cardNum = preg_replace('/\D/', '', $_POST['co_num'] ?? '');
-            if ($cardNum !== '') {
-                $this->pdo->prepare('UPDATE users SET card=? WHERE id=?')->execute([$cardNum, $this->me['id']]);
+            // Also auto-save credit card, phone and address to profile
+            $cardNum  = preg_replace('/\D/', '', $_POST['co_num'] ?? '');
+            $newPhone = trim($_POST['co_phone'] ?? '');
+            $newAddr  = trim($_POST['co_address'] ?? '');
+            if ($cardNum !== '' || $newPhone !== '' || $newAddr !== '') {
+                $this->pdo->prepare('UPDATE users SET card=COALESCE(NULLIF(?,""), card), phone=COALESCE(NULLIF(?,""), phone), address=COALESCE(NULLIF(?,""), address) WHERE id=?')
+                     ->execute([$cardNum, $newPhone, $newAddr, $this->me['id']]);
             }
             
             $this->me['payment_pin_hash'] = $hash;

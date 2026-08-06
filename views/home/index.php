@@ -1,4 +1,7 @@
 <?php
+if (!isset($wishlist) || !is_array($wishlist)) { $wishlist = []; }
+?>
+<?php
 if (!function_exists('cd_get_unit_label')) {
     function cd_get_unit_label($p) {
         if (!empty($p['unit'])) {
@@ -36,80 +39,15 @@ if (!function_exists('cd_get_unit_label')) {
 <?php
 /* FR7 — Package Comparison Matrix helpers */
 if (!function_exists('cd_render_illustration')) {
-    function cd_render_illustration($category, $name = '') {
-      $cat = strtolower($category);
-      $iconColor = 'var(--brand)';
-      if ($cat === 'mobile') {
-        return '
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-          <line x1="12" y1="18" x2="12.01" y2="18"></line>
-        </svg>';
-      } elseif ($cat === 'broadband') {
-        return '
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-          <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
-          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
-          <line x1="12" y1="20" x2="12.01" y2="20"></line>
-        </svg>';
-      } elseif ($cat === 'tablet') {
-        return '
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4" y="3" width="16" height="18" rx="2" ry="2"></rect>
-          <line x1="12" y1="18" x2="12.01" y2="18"></line>
-        </svg>';
-      } elseif ($cat === 'bundles') {
-        return '
-        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 12V8H4v4"></path>
-          <path d="M2 4h20v4H2z"></path>
-          <path d="M12 22V8"></path>
-          <path d="M12 8H4v8a2 2 0 0 0 2 2h6"></path>
-          <path d="M12 8h8v8a2 2 0 0 1-2 2h-6"></path>
-          <path d="M12 2a4 4 0 0 1 4 4v2H8V6a4 4 0 0 1 4-4z"></path>
-        </svg>';
-      } else {
-        $nm = strtolower($name);
-        if (strpos($nm, 'keyboard') !== false) {
-          return '
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
-            <line x1="6" y1="8" x2="6.01" y2="8"></line>
-            <line x1="10" y1="8" x2="10.01" y2="8"></line>
-            <line x1="14" y1="8" x2="14.01" y2="8"></line>
-            <line x1="18" y1="8" x2="18.01" y2="8"></line>
-            <line x1="7" y1="16" x2="17" y2="16"></line>
-          </svg>';
-        } elseif (strpos($nm, 'mouse') !== false) {
-          return '
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="2" width="14" height="20" rx="7" ry="7"></rect>
-            <line x1="12" y1="2" x2="12" y2="10"></line>
-            <line x1="5" y1="10" x2="19" y2="10"></line>
-          </svg>';
-        } elseif (strpos($nm, 'laptop') !== false) {
-          return '
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="4" width="16" height="12" rx="2" ry="2"></rect>
-            <line x1="2" y1="20" x2="22" y2="20"></line>
-            <line x1="5" y1="16" x2="19" y2="16"></line>
-          </svg>';
-        } elseif (strpos($nm, 'phone') !== false || strpos($nm, 'iphone') !== false || strpos($nm, 'samsung') !== false || strpos($nm, 'oppo') !== false) {
-          return '
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-            <circle cx="12" cy="18" r="1"></circle>
-            <circle cx="12" cy="5" r="0.5"></circle>
-          </svg>';
-        } else {
-          return '
-          <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="'.$iconColor.'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-          </svg>';
-        }
+    function cd_render_illustration($category, $name = '', $code = '') {
+      if (function_exists('cd_product_card_image')) {
+          $img = cd_product_card_image($code, $category);
+          if ($img !== '') {
+              return '<img class="card-photo" src="' . htmlspecialchars($img, ENT_QUOTES) . '" alt="' . htmlspecialchars($name, ENT_QUOTES) . '" style="display:block; width:100%; height:110px; object-fit:contain; margin:0 auto; border-radius:6px;">';
+          }
       }
-    }
+      return '<div style="font-size:2.5rem; text-align:center; line-height:110px;">📦</div>';
+}
 }
 
 if (!function_exists('cd_spec_value')) {
@@ -324,7 +262,7 @@ require __DIR__ . '/../layout/header.php';
           <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($pCode) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
         </div>
         <div class="card-visual cat-<?= strtolower($p['category'] ?? 'hardware') ?>" style="height:120px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,43,214,0.06)); overflow:hidden; border:1px solid rgba(0,229,255,0.12); position:relative;">
-          <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name']) ?>
+          <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name'], $pCode ?? ($p['code'] ?? '')) ?>
         </div>
         <h3><?= esc($p['name']) ?></h3>
         <?php $recUnit = cd_get_unit_label($p); ?>
@@ -420,7 +358,7 @@ foreach ($pkgs as $p):
       <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($pCode) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
     </div>
     <div class="card-visual cat-<?= strtolower($p['category'] ?? 'hardware') ?>" style="height:120px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,43,214,0.06)); overflow:hidden; border:1px solid rgba(0,229,255,0.12); position:relative;">
-      <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name']) ?>
+      <?= cd_render_illustration($p['category'] ?? 'Hardware', $p['name'], $pCode ?? ($p['code'] ?? '')) ?>
     </div>
     <h3><?= esc($p['name']) ?></h3>
     <?php $unitLabel = cd_get_unit_label($p); ?>
@@ -484,7 +422,7 @@ foreach ($prods as $p):
       <button class="wishlist-btn <?= $wish_active ?>" data-code="<?= esc($pCode) ?>" title="Save Deal" <?= $wish_attr ?>><?= $wish_icon ?></button>
     </div>
     <div class="card-visual cat-hardware" style="height:120px; border-radius:8px; margin-bottom:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(0,229,255,0.06), rgba(255,43,214,0.06)); overflow:hidden; border:1px solid rgba(0,229,255,0.12); position:relative;">
-      <?= cd_render_illustration('Hardware', $p['name']) ?>
+      <?= cd_render_illustration('Hardware', $p['name'], $pCode ?? ($p['code'] ?? '')) ?>
     </div>
     <h3><?= esc($p['name']) ?></h3>
     <div class="price"><?= gbp($p['price']) ?></div>

@@ -17,13 +17,13 @@ function sendVerificationEmail($email, $code) {
     global $pdo;
     saveEmailVerificationCode($pdo, $email, $code);
     $subject = "CheapDeals Account Verification Code - $code";
-    $message = "Hello,\n\nYour CheapDeals 6-digit verification code is: $code\n\nPlease enter this code to complete your registration. This code will expire in 15 minutes.\n\nThank you,\nCheapDeals Team";
+    $message = "Dear Valued Customer,\n\nThank you for registering and choosing CheapDeals!\n\nYour 6-digit account verification code is: $code\n\nPlease enter this code on the registration page to complete your account setup. This code is valid for 15 minutes.\n\nWe wish you a wonderful day!\n\nSincerely,\nCheapDeals LTD Support Team";
     $headers = "From: CheapDeals Support <no-reply@cheapdeals.com>\r\n" .
                "Reply-To: no-reply@cheapdeals.com\r\n" .
                "X-Mailer: PHP/" . phpversion() . "\r\n" .
                "MIME-Version: 1.0\r\n" .
                "Content-Type: text/plain; charset=UTF-8\r\n";
-    $logLine = "[" . date('Y-m-d H:i:s') . "] [$email] Code: $code\n";
+    $logLine = "[" . date('Y-m-d H:i:s') . "] [$email] Register Code: $code\n";
     @file_put_contents(__DIR__ . '/email_codes.log', $logLine, FILE_APPEND | LOCK_EX);
     try {
         @mail($email, $subject, $message, $headers);

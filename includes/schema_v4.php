@@ -1,6 +1,6 @@
 <?php
 /**
- * v4 schema bootstrap — FR17, FR22, FR29, FR34, FR35 (Lê Dương Phú)
+ * v4 schema bootstrap — FR17, FR22, FR29, FR34, FR35 (Le Duong Phu)
  * Uses the same "auto-create on first load" convention v3 already used
  * for audit_log / vouchers in includes/auth.php, so no manual DB import
  * is needed. Safe to require_once from every page that needs the new

@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/product_image.php';
+
 if (!function_exists('saveEmailVerificationCode')) {
     function saveEmailVerificationCode($pdo, $email, $code) {
         if (!$pdo || !$email || !$code) return;

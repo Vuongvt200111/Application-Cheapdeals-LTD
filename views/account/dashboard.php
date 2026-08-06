@@ -57,17 +57,137 @@ if (!empty($orders)) {
       <h3><?= esc($ME['name']) ?></h3><div class="email"><?= esc($ME['email']) ?></div>
       <span class="status"><span class="dot"></span> Active</span>
     </div>
-    <nav class="acc-nav">
-      <a class="<?= $tab==='overview'?'active':'' ?>" href="account.php?tab=overview">📊 Overview</a>
-      <a class="<?= $tab==='personal'?'active':'' ?>" href="account.php?tab=personal">✏️ Personal Info</a>
-      <a class="<?= $tab==='security'?'active':'' ?>" href="account.php?tab=security">🔑 Security</a>
-      <a class="<?= $tab==='usage'?'active':'' ?>" href="account.php?tab=usage">📈 Usage</a>
-      <a class="<?= $tab==='billing'?'active':'' ?>" href="account.php?tab=billing">💳 Billing</a>
-      <a class="<?= $tab==='wishlist'?'active':'' ?>" href="account.php?tab=wishlist">❤️ Wishlist</a>
-      <a class="<?= $tab==='reviews'?'active':'' ?>" href="account.php?tab=reviews">⭐ My Reviews</a>
-      <a href="support.php">💬 Support</a>
-      <a class="out" href="logout.php">⏻ Sign Out</a>
+    <?php
+      $group1Active = in_array($tab, ['overview', 'personal', 'security'], true);
+      $group2Active = in_array($tab, ['billing', 'usage', 'wishlist', 'reviews', 'order_process'], true);
+      $group3Active = false; // support & logout
+    ?>
+    <style>
+      .acc-nav-header {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--cyan, #00e5ff);
+        padding: 8px 10px 6px;
+        margin-bottom: 2px;
+        opacity: 0.9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+        transition: opacity 0.2s ease, background 0.2s ease;
+        border-radius: 6px;
+      }
+      .acc-nav-header:hover {
+        opacity: 1;
+        background: rgba(0, 229, 255, 0.1);
+      }
+      .acc-nav-header .toggle-arrow {
+        font-size: 10px;
+        transition: transform 0.25s ease;
+        display: inline-block;
+      }
+      .acc-nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .acc-nav-subitems {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        transition: all 0.3s ease;
+      }
+      .acc-nav-group.collapsed .acc-nav-subitems {
+        display: none !important;
+      }
+      .acc-nav-group.collapsed .toggle-arrow {
+        transform: rotate(-90deg);
+      }
+    </style>
+    
+<style>
+  @media (max-width: 650px) {
+    .step-node { width: 70px !important; }
+    .step-node .node-circle { width: 32px !important; height: 32px !important; font-size: 13px !important; }
+    .step-node div:last-child { font-size: 10px !important; }
+  }
+</style>
+    <nav class="acc-nav" id="cdAccNav">
+      <div class="acc-nav-group <?= $group1Active ? '' : 'collapsed' ?>" data-group-id="my_account">
+        <div class="acc-nav-header" onclick="cdToggleAccNav(this)" title="Click to collapse/expand">
+          <span>👤 MY ACCOUNT</span>
+          <span class="toggle-arrow">▾</span>
+        </div>
+        <div class="acc-nav-subitems">
+          <a class="<?= $tab==='overview'?'active':'' ?>" href="account.php?tab=overview">📊 Overview</a>
+          <a class="<?= $tab==='personal'?'active':'' ?>" href="account.php?tab=personal">✏️ Personal Info</a>
+          <a class="<?= $tab==='security'?'active':'' ?>" href="account.php?tab=security">🔑 Security</a>
+        </div>
+      </div>
+
+      <div class="acc-nav-group <?= $group2Active ? '' : 'collapsed' ?>" style="margin-top:10px;" data-group-id="order_management">
+        <div class="acc-nav-header" onclick="cdToggleAccNav(this)" title="Click to collapse/expand">
+          <span>📦 ORDER MANAGEMENT</span>
+          <span class="toggle-arrow">▾</span>
+        </div>
+        <div class="acc-nav-subitems">
+          <a class="<?= $tab==='billing'?'active':'' ?>" href="account.php?tab=billing">💳 Billing &amp; Orders</a>
+          <a class="<?= $tab==='usage'?'active':'' ?>" href="account.php?tab=usage">📈 Usage &amp; Services</a>
+          <a class="<?= $tab==='wishlist'?'active':'' ?>" href="account.php?tab=wishlist">💖 Wishlist</a>
+          <a class="<?= $tab==='reviews'?'active':'' ?>" href="account.php?tab=reviews">⭐️ My Reviews</a>
+          <a class="<?= $tab==='order_process'?'active':'' ?>" href="account.php?tab=order_process">🚚 Order process</a>
+        </div>
+      </div>
+
+      <div class="acc-nav-group <?= $group3Active ? '' : 'collapsed' ?>" style="margin-top:10px;" data-group-id="system_help">
+        <div class="acc-nav-header" onclick="cdToggleAccNav(this)" title="Click to collapse/expand">
+          <span>⚙️ SYSTEM &amp; HELP</span>
+          <span class="toggle-arrow">▾</span>
+        </div>
+        <div class="acc-nav-subitems">
+          <a href="support.php">💬 Support</a>
+          <a class="out" href="logout.php">⏻ Sign Out</a>
+        </div>
+      </div>
     </nav>
+    <script>
+      (function() {
+        // Restore manual user toggle preferences from localStorage if available
+        try {
+          var groups = document.querySelectorAll('#cdAccNav .acc-nav-group');
+          groups.forEach(function(g) {
+            var gId = g.getAttribute('data-group-id');
+            var savedState = localStorage.getItem('cd_nav_' + gId);
+            // If user explicitly interacted with this group in localStorage, apply saved preference
+            // Unless this group contains an active link (.active), which stays open for usability
+            if (savedState !== null && !g.querySelector('a.active')) {
+              if (savedState === 'collapsed') {
+                g.classList.add('collapsed');
+              } else if (savedState === 'expanded') {
+                g.classList.remove('collapsed');
+              }
+            }
+          });
+        } catch(e) {}
+      })();
+
+      function cdToggleAccNav(headerEl) {
+        var group = headerEl.closest('.acc-nav-group');
+        if (group) {
+          group.classList.toggle('collapsed');
+          var isCollapsed = group.classList.contains('collapsed');
+          var gId = group.getAttribute('data-group-id');
+          if (gId) {
+            try {
+              localStorage.setItem('cd_nav_' + gId, isCollapsed ? 'collapsed' : 'expanded');
+            } catch(e) {}
+          }
+        }
+      }
+    </script>
   </aside>
   <section class="acc-main"><div class="panel">
   
@@ -111,17 +231,23 @@ if (!empty($orders)) {
       <!-- Avatar upload (BUG-019) -->
       <div class="fg">
         <label>Profile Avatar</label>
-        <input type="file" name="avatar" accept="image/*">
+        <div class="custom-file-wrap" style="display:flex; align-items:center; gap:10px; margin-top:6px; margin-bottom:6px;">
+          <label style="cursor:pointer; margin:0; font-size:12px; padding:6px 14px; background:var(--card); border:1px solid var(--line); border-radius:6px; color:var(--ink); font-weight:600; display:inline-block;">
+            Choose File
+            <input type="file" name="avatar" accept="image/*" style="display:none;" onchange="var fn=document.getElementById('avatar-filename'); if(fn){ fn.textContent = this.files[0] ? this.files[0].name : 'No file chosen'; }">
+          </label>
+          <span id="avatar-filename" style="font-size:12px; color:var(--muted);">No file chosen</span>
+        </div>
         <small style="color:var(--muted); margin-top:4px; display:block;">Upload a JPG, PNG, or GIF file.</small>
       </div>
       
       <div class="fg"><label>Full name</label><input name="name" value="<?= esc($ME['name']) ?>" required></div>
       <div class="fg"><label>Email (cannot be changed)</label><input value="<?= esc($ME['email']) ?>" disabled></div>
-      <div class="fg"><label>Address</label><input name="address" value="<?= esc($ME['address']) ?>" required></div>
+      <div class="fg"><label>Address</label><input name="address" value="<?= esc($ME['address'] ?? '') ?>" required></div>
       
       <div class="two-col">
-        <div class="fg"><label>Telephone</label><input name="phone" maxlength="10" pattern="[0-9]{10}" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" value="<?= esc($ME['phone']) ?>" required></div>
-        <div class="fg"><label>Credit card number (optional)</label><input name="card" maxlength="19" value="<?= esc($ME['card']) ?>" placeholder="Leave empty if not set"></div>
+        <div class="fg"><label>Telephone</label><input name="phone" maxlength="10" pattern="[0-9]{10}" oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)" value="<?= esc($ME['phone'] ?? '') ?>" required></div>
+        <div class="fg"><label>Credit card number (optional)</label><input name="card" maxlength="19" value="<?= esc($ME['card'] ?? '') ?>" placeholder="Leave empty if not set"></div>
       </div>
       
       <!-- PIN management (BUG-031) -->
@@ -274,7 +400,152 @@ if (!empty($orders)) {
       </table></div>
     <?php endif; ?>
 
-  <?php else:
+    <?php elseif ($tab === 'order_process'): ?>
+    <div class="acc-head" style="font-size:18px; margin-bottom:20px;">🚚 Order Process &amp; Live Tracking</div>
+    
+    <!-- 30-Second Animated 4-Step Stepper Component -->
+    <div class="panel" style="margin-bottom:30px; padding:24px; border:1px solid rgba(0,229,255,0.25); background:linear-gradient(135deg, rgba(7,11,22,0.95), rgba(15,23,42,0.95)); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+      <div style="font-size:14px; font-weight:700; color:var(--cyan); margin-bottom:20px; display:flex; align-items:center; justify-content:space-between;">
+        <span>Live Delivery Progress</span>
+        <span id="stepper-time-status" style="font-size:12px; color:var(--muted); font-weight:500;">Status: Step 1 of 4</span>
+      </div>
+
+      <div style="position:relative; margin:30px 20px 50px;">
+        <!-- Stepper Background Line -->
+        <div style="position:absolute; top:20px; left:0; width:100%; height:4px; background:rgba(255,255,255,0.1); border-radius:2px; z-index:1;"></div>
+        <!-- Animated Progress Fill Line -->
+        <div id="stepper-progress-bar" style="position:absolute; top:20px; left:0; width:0%; height:4px; background:linear-gradient(90deg, #00f2fe 0%, #4facfe 50%, #00e5ff 100%); border-radius:2px; z-index:2; transition:width 1s linear;"></div>
+
+        <!-- 4 Step Circular Nodes -->
+        <div style="position:relative; z-index:3; display:flex; justify-content:space-between;">
+          <!-- Node 1 -->
+          <div class="step-node" id="node-step-1" style="text-align:center; width:100px;">
+            <div class="node-circle" style="width:40px; height:40px; border-radius:50%; background:var(--card); border:2px solid var(--cyan); color:var(--cyan); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; margin:0 auto 10px; transition:all 0.4s ease; box-shadow:0 0 12px rgba(0,229,255,0.4);">1</div>
+            <div style="font-size:12px; font-weight:700; color:var(--heading); line-height:1.3;">Awaiting confirmation</div>
+          </div>
+          <!-- Node 2 -->
+          <div class="step-node" id="node-step-2" style="text-align:center; width:100px;">
+            <div class="node-circle" style="width:40px; height:40px; border-radius:50%; background:var(--card); border:2px solid var(--line); color:var(--muted); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; margin:0 auto 10px; transition:all 0.4s ease;">2</div>
+            <div style="font-size:12px; font-weight:700; color:var(--muted); line-height:1.3;">Awaiting pickup</div>
+          </div>
+          <!-- Node 3 -->
+          <div class="step-node" id="node-step-3" style="text-align:center; width:100px;">
+            <div class="node-circle" style="width:40px; height:40px; border-radius:50%; background:var(--card); border:2px solid var(--line); color:var(--muted); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; margin:0 auto 10px; transition:all 0.4s ease;">3</div>
+            <div style="font-size:12px; font-weight:700; color:var(--muted); line-height:1.3;">Out for delivery</div>
+          </div>
+          <!-- Node 4 -->
+          <div class="step-node" id="node-step-4" style="text-align:center; width:100px;">
+            <div class="node-circle" style="width:40px; height:40px; border-radius:50%; background:var(--card); border:2px solid var(--line); color:var(--muted); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; margin:0 auto 10px; transition:all 0.4s ease;">4</div>
+            <div style="font-size:12px; font-weight:700; color:var(--muted); line-height:1.3;">Delivered</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function() {
+        var duration = 30; // 30 seconds total
+        var startTime = Date.now();
+        
+        function updateStepper() {
+          var elapsed = (Date.now() - startTime) / 1000;
+          var cycleTime = elapsed % duration;
+          var pct = (cycleTime / duration) * 100;
+          
+          var progressBar = document.getElementById('stepper-progress-bar');
+          var statusTxt = document.getElementById('stepper-time-status');
+          if (progressBar) progressBar.style.width = pct + '%';
+          
+          var currentStep = 1;
+          if (pct >= 100) currentStep = 4;
+          else if (pct >= 66.6) currentStep = 4;
+          else if (pct >= 33.3) currentStep = 3;
+          else if (pct >= 10) currentStep = 2;
+          
+          for (var i = 1; i <= 4; i++) {
+            var node = document.getElementById('node-step-' + i);
+            if (node) {
+              var circle = node.querySelector('.node-circle');
+              var label = node.querySelector('div:last-child');
+              if (i <= currentStep) {
+                circle.style.border = '2px solid var(--cyan)';
+                circle.style.background = 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)';
+                circle.style.color = '#000';
+                circle.style.boxShadow = '0 0 15px rgba(0,229,255,0.6)';
+                if (label) label.style.color = 'var(--cyan)';
+              } else {
+                circle.style.border = '2px solid var(--line)';
+                circle.style.background = 'var(--card)';
+                circle.style.color = 'var(--muted)';
+                circle.style.boxShadow = 'none';
+                if (label) label.style.color = 'var(--muted)';
+              }
+            }
+          }
+          
+          if (statusTxt) {
+            var stepNames = ['Awaiting confirmation', 'Awaiting pickup', 'Out for delivery', 'Delivered'];
+            statusTxt.textContent = 'Status: Step ' + currentStep + ' of 4 (' + stepNames[currentStep-1] + ')';
+          }
+        }
+        
+        updateStepper();
+        setInterval(updateStepper, 500);
+      })();
+    </script>
+
+    <!-- Purchased Hardware Products Details Section -->
+    <h3 class="sec-h" style="font-size:16px; margin-bottom:14px;">🛍️ Purchased Hardware Items &amp; Delivery Details</h3>
+    <?php
+      $hwOrders = [];
+      if (!empty($orders)) {
+          foreach ($orders as $ord) {
+              $st = strtolower($ord['status'] ?? '');
+              if ($st !== 'cancelled') {
+                  $hwOrders[] = $ord;
+              }
+          }
+      }
+    ?>
+    <?php if (empty($hwOrders)): ?>
+      <div class="panel" style="padding:20px; text-align:center; color:var(--muted);">
+        No hardware orders found. <a href="index.php" style="color:var(--cyan); font-weight:bold;">Browse hardware packages</a> to place an order.
+      </div>
+    <?php else: ?>
+      <div style="display:grid; gap:16px;">
+        <?php foreach ($hwOrders as $ho): ?>
+          <?php
+            $itemCode = $ho['package_code'] ?? 'prod-iphone15';
+            $itemName = $ho['package_name'] ?? 'Hardware Device';
+            $itemImg  = function_exists('cd_product_card_image') ? cd_product_card_image($itemCode, 'Hardware') : '';
+          ?>
+          <div class="panel" style="padding:18px; border:1px solid rgba(0,229,255,0.18); background:rgba(15,23,42,0.8); border-radius:10px; display:flex; gap:18px; align-items:center; flex-wrap:wrap;">
+            <?php if ($itemImg !== ''): ?>
+              <div style="width:90px; height:80px; background:rgba(0,0,0,0.3); border-radius:8px; padding:6px; display:flex; align-items:center; justify-content:center; border:1px solid var(--line);">
+                <img src="<?= htmlspecialchars($itemImg, ENT_QUOTES) ?>" alt="<?= esc($itemName) ?>" style="max-width:100%; max-height:100%; object-fit:contain;" />
+              </div>
+            <?php endif; ?>
+
+            <div style="flex:1; min-width:220px;">
+              <div style="font-size:16px; font-weight:800; color:var(--heading); margin-bottom:4px;"><?= esc($itemName) ?></div>
+              <div style="font-size:13px; color:var(--cyan); font-weight:700; margin-bottom:6px;"><?= gbp($ho['total']) ?></div>
+              <div style="font-size:12px; color:var(--muted); line-height:1.4;">
+                <div>📍 <strong>Delivery Address:</strong> <?= esc($ME['address'] ?? 'Greenwich, London') ?></div>
+                <div>📞 <strong>Contact Phone:</strong> <?= esc($ME['phone'] ?? 'N/A') ?></div>
+                <div>📅 <strong>Order Date:</strong> <?= esc(substr($ho['created_at'], 0, 10)) ?> (Order #<?= $ho['id'] ?>)</div>
+              </div>
+            </div>
+
+            <div>
+              <span style="font-size:11px; font-weight:800; padding:5px 12px; border-radius:20px; text-transform:uppercase; background:rgba(0,229,255,0.15); color:var(--cyan); border:1px solid rgba(0,229,255,0.3);">
+                <?= esc($ho['status'] ?? 'Paid') ?>
+              </span>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
+<?php elseif ($tab === 'billing'):
     $hasDeal = false; foreach ($orders as $o) if (preg_match('/Bundle|Triple|Double/', $o['package_name'])) $hasDeal = true;
     $code = $hasDeal ? 'SAVE10' : 'WELCOME5';
   ?>
@@ -308,7 +579,7 @@ if (!empty($orders)) {
                 }
               ?>
             </td>
-            <td class="discount"><?= gbp($o['saved']) ?></td>
+            <td class="discount"><?= gbp($o['saved'] ?? 0) ?></td>
             <td><?= gbp($o['total']) ?></td>
             <td><?= esc($o['status']) ?></td>
             <td>
@@ -339,9 +610,15 @@ if (!empty($orders)) {
                 <?php
                   $orderCreated = strtotime($o['created_at']);
                   $minsPassed = (time() - $orderCreated) / 60;
-                  if ($minsPassed <= 5 && ($o['status'] ?? '') !== 'Cancelled'):
+                  $st = strtolower($o['status'] ?? '');
+                  if ($minsPassed <= 5 && $st !== 'cancelled' && $st !== 'refunded' && $st !== 'refund requested'):
                 ?>
                   <a class="btn small btn-cancel-order" href="cancel.php?id=<?= $o['id'] ?>" data-created="<?= $o['created_at'] ?>" style="background:#ff3547; color:#fff; padding:4px 10px; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; width:100%; box-sizing:border-box;">Cancel <span class="cancel-timer-badge" data-created="<?= $o['created_at'] ?>" style="font-size:10px; color:#fff; margin-left:4px;"></span></a>
+                  <a class="btn small btn-refund-dyn" href="account.php?tab=billing&act=refund&id=<?= $o['id'] ?>" onclick="return confirm('Do you want to request a return / refund for this order?');" style="display:none; background:linear-gradient(135deg, #ff007f 0%, #7928ca 100%); color:#fff; padding:4px 10px; font-size:11px; text-decoration:none; align-items:center; justify-content:center; border-radius:4px; width:100%; box-sizing:border-box; font-weight:bold; margin-top:4px;">Refund</a>
+                <?php elseif ($st === 'refunded' || $st === 'refund requested'): ?>
+                  <span style="font-size:11px; color:var(--cyan); font-weight:bold; padding:4px 8px; background:rgba(0,229,255,0.1); border-radius:4px; border:1px solid rgba(0,229,255,0.3); text-align:center; display:block;">Refund Requested</span>
+                <?php elseif ($st !== 'cancelled'): ?>
+                  <a class="btn small" href="account.php?tab=billing&act=refund&id=<?= $o['id'] ?>" onclick="return confirm('Do you want to request a return / refund for this order?');" style="background:linear-gradient(135deg, #ff007f 0%, #7928ca 100%); color:#fff; padding:4px 10px; font-size:11px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; width:100%; box-sizing:border-box; font-weight:bold;">Refund</a>
                 <?php endif; ?>
               </div>
             </td>
@@ -411,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
 <?php require __DIR__ . '/../layout/footer.php'; ?>
 
 <script>
@@ -440,11 +718,11 @@ document.addEventListener('DOMContentLoaded', function(){
       const diff = deadline - now;
       if (diff <= 0) {
         btn.style.display = 'none';
-        if (badge) badge.innerText = '(Hạn hủy 15p hết)';
+        if (badge) badge.innerText = '(15-min cancel limit expired)';
       } else {
         const m = Math.floor(diff / 60000);
         const s = Math.floor((diff % 60000) / 1000);
-        if (badge) badge.innerText = '(Còn ' + m + ':' + (s < 10 ? '0' : '') + s + ' để hủy)';
+        if (badge) badge.innerText = '(Time left: ' + m + ':' + (s < 10 ? '0' : '') + s + ' to cancel)';
       }
     }
     updateTimer();
